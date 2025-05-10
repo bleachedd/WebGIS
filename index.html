@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebGIS Kota Bandung</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css" />
+  <link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #641B2E;
+      --secondary: #8A2D3B;
+      --tertiary: #BE5B50;
+      --accent: #FBDB93;
+      --dark: #333;
+      --light: #f9f9f9;
+    }
+    
+    body, html { 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Poppins', sans-serif; 
+      scroll-behavior: smooth;
+      color: var(--dark);
+      background-color: var(--light);
+    }
+
+  /* Header Styles */
+header {
+  background-color: var(--primary); 
+  color: white; 
+  padding: 0.8rem 2rem;
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  position: fixed; /* Mengubah dari sticky menjadi fixed untuk memastikan posisi tetap */
+  top: 0; 
+  left: 0;
+  right: 0;
+  z-index: 9999; /* Meningkatkan z-index untuk memastikan berada di atas semua elemen */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+header .logo { 
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; 
+}
+
+header .logo img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent);
+}
+
+header .logo h2 {
+  font-weight: 600;
+  margin: 0;
+  color: var(--accent);
+}
+
+header nav ul { 
+  list-style: none; 
+  display: flex; 
+  gap: 1.5rem; 
+  margin: 0; 
+  padding: 0; 
+}
+
+header nav a { 
+  color: white; 
+  text-decoration: none; 
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+header nav a:hover {
+  background-color: var(--accent);
+  color: var(--primary);
+}
+
+/* Menambahkan padding-top pada body/main content untuk kompensasi header fixed */
+body {
+  padding-top: 80px; /* Sesuaikan dengan tinggi header Anda */
+}
+
+    /* Hero Section */
+  
+.hero-section {
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('asset/alun alun bandung1.jpg') center/cover no-repeat;
+  color: white;
+  text-align: center;
+  padding: 8rem 2rem;
+  position: relative;
+}
+
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+  z-index: 2;
+}
+
+.hero-section h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--accent);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.hero-section p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+ .cta-button {
+  display: inline-block;
+  background-color: var(--primary);
+  color: var(--accent);
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px var(--dark);
+}
+
+.cta-button:hover {
+  background-color: var(--primary);
+  color: var(--bg);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px --light;
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+    /* Map Section */
+    #map-section { 
+      padding: 4rem 2rem; 
+      background: var(--light);
+    }
+    
+    .section-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .section-header h2 {
+      color: var(--primary);
+      font-size: 2.2rem;
+      margin-bottom: 1rem;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .section-header h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      width: 60%;
+      height: 4px;
+      background-color: var(--tertiary);
+      transform: translateX(-50%);
+      border-radius: 2px;
+    }
+    
+    .section-header p {
+      color: var(--secondary);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .map-container {
+      position: relative;
+      margin-top: 2rem;
+    }
+    
+    #map { 
+      height: 450px; 
+      width: 100%; 
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+    
+    .map-tools {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .tool-button {
+      padding: 0.6rem 1.2rem;
+      background-color: var(--tertiary);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    
+    .tool-button:hover {
+      background-color: var(--secondary);
+    }
+    
+    .tool-button i {
+      font-size: 1rem;
+    }
+    
+    /* Information Cards */
+.info-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.8rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.info-card {
+  background: var(--accent);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(138, 45, 59, 0.8);
+  transition: transform 0.3s;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+}
+
+.info-card h3 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.info-card p {
+  font-size: 0.95rem;
+  color: var(--dark);
+}
+    /* Footer */
+    footer {
+      background: var(--primary); 
+      color: var(--light); 
+      padding: 2rem;
+    }
+    
+    .footer-content {
+  display: flex;
+  justify-content: center; /* <--- ini yang menggeser ke tengah */
+  gap: 60px; /* jarak antar kolom */
+  flex-wrap: wrap;
+  text-align: left;
+}
+ .footer-section {
+  max-width: 300px;
+}
+
+    .footer-section h3 {
+      color: var(--accent);
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .footer-section h3::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 50px;
+      height: 2px;
+      background-color: var(--accent);
+    }
+    .footer-developer {
+  text-align: center; /* Menjadikan teks di dalam div footer-developer menjadi rata tengah */
+  padding: 20px;
+}
+
+.footer-developer h3 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.developer-info {
+  display: inline-block; /* Menggunakan inline-block agar konten di dalamnya dapat tersusun dengan baik */
+  text-align: center;
+}
+
+.developer-photo {
+  width: 120px; /* Sesuaikan ukuran gambar */
+  height: 120px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+
+    
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    
+    .social-icons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .social-icons a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background-color: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      color: white;
+      transition: all 0.3s ease;
+    }
+    
+    .social-icons a:hover {
+      background-color: var(--accent);
+      color: var(--primary);
+      transform: translateY(-3px);
+    }
+    
+
+/* Information Cards */
+.info-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+.info-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+
+.info-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform 0.3s;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+}
+
+.info-card h3 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.info-card p {
+  font-size: 0.95rem;
+  color: var(--dark);
+}
+.info-card p {
+    text-align: justify;
+}
+.info-icon {
+  text-align: center;
+  margin: 0.5rem 0;
+  color: var(--primary); /* atau sesuaikan dengan tema warna */
+}
+
+.info.legend {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    line-height: 1.3;
+    color: var(--dark);
+    max-width: 200px;
+    font-size: 12px;
+
+    position: absolute;
+    top: 50%;
+    left: 4px;
+    transform: translateY(-110%);
+}
+
+.info.legend h4 {
+    margin: 4px 0 4px;
+    color: var(--primary);
+    text-align: center;
+    font-size: 13px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 2px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2px;
+    margin-top: 2px;
+    font-size: 11px;
+}
+
+.legend-color {
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    border-radius: 2px;
+    border: 1px solid rgba(0,0,0,0.2);
+}
+
+
+    /* Popup Styles */
+    .leaflet-popup-content-wrapper {
+      border-radius: 8px;
+      padding: 0;
+      overflow: hidden;
+    }
+    
+    .custom-popup {
+      padding: 0;
+    }
+    
+    .popup-header {
+      background-color: var(--primary);
+      color: white;
+      padding: 10px 15px;
+      font-weight: 600;
+    }
+    
+    .popup-content {
+      padding: 15px;
+    }
+    
+    .popup-content p {
+      margin: 5px 0;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        padding: 1rem;
+      }
+      
+      header .logo {
+        margin-bottom: 1rem;
+      }
+      
+      header nav ul {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+      }
+      
+      .hero-section h1 {
+        font-size: 2rem;
+      }
+      
+      .hero-section p {
+        font-size: 1rem;
+      }
+      
+      #map {
+        height: 300px;
+      }
+      
+      .footer-content {
+        flex-direction: column;
+      }
+    }
+    
+    /* Mobile Menu Toggle */
+    .menu-toggle {
+      display: none;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+      
+      header nav {
+        width: 100%;
+      }
+      
+      header nav ul {
+        display: none;
+        width: 100%;
+      }
+      
+      header nav.active ul {
+        display: flex;
+      }
+    }
+    
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <img src="asset/logo.png" alt="Logo WebGIS Bandung" />
+    <h2>WebGIS Kota Bandung</h2>
+  </div>
+  <button class="menu-toggle" id="menu-toggle">
+    <i class="fas fa-bars"></i>
+  </button>
+  <nav id="main-nav">
+    <ul>
+      <li><a href="#hero-section"><i class="fas fa-home"></i> Home</a></li>
+      <li><a href="#map-section"><i class="fas fa-map"></i> Peta</a></li>
+      <li><a href="#info-section"><i class="fas fa-info-circle"></i></i> Informasi</a></li>
+      <li><a href="#footer"><i class="fas fa-envelope"></i> Kontak</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section id="hero-section" class="hero-section">
+  <div class="hero-content">
+    <h1>Eksplorasi Spasial Kota Bandung</h1>
+    <p>Jelajahi data dan informasi geografis Kota Bandung secara interaktif melalui platform WebGIS ini. Temukan tutupan lahan, batas administrasi, dan informasi spasial lainnya.</p>
+    <a href="#map-section" class="cta-button"><i class="fas fa-map-marker-alt"></i> Mulai Eksplorasi</a>
+  </div>
+</section>
+
+<section id="map-section">
+  <div class="section-header">
+    <h2>Peta Interaktif Kota Bandung</h2>
+    <p>Visualisasi data spasial Kota Bandung dengan berbagai lapisan informasi geografis</p>
+  </div>
+  <div class="map-container">
+    <div id="map"></div>
+    <div class="map-tools">
+      <button class="tool-button" id="reset-view"><i class="fas fa-home"></i> Reset View</button>
+      <button class="tool-button" id="toggle-legend"><i class="fas fa-list"></i> Legend</button>
+      <button class="tool-button" id="measure-tool"><i class="fas fa-ruler"></i> Ukur Jarak</button>
+    </div>
+  </div>
+</section>
+<section id="info-section">
+  <div class="section-header">
+    <h2>Informasi Kota Bandung</h2>
+    <p>Bandung dikenal sebagai Paris van Java dengan berbagai destinasi wisata, kuliner khas, dan budaya yang menarik.</p>
+  </div>
+<div class="info-cards">
+  <div class="info-card">
+    <img src="asset/kawah-putih.jpg" alt="Kawah Putih" class="info-image">
+    <h3>Wisata</h3>
+    <p>Destinasi populer di Bandung mencakup Kawah Putih, Tangkuban Perahu, Dusun Bambu, Braga, dan Floating Market. Kawasan ini menyajikan kombinasi alam, sejarah, dan hiburan modern. <br><small>Sumber: Disparbud Jabar</small></p>
+  </div>
+  <div class="info-card">
+    <img src="asset/kota-kreatif.jpg" alt="Kota Kreatif" class="info-image">
+    <h3>Fakta Menarik</h3>
+    <p>Bandung menjadi kota pertama di Indonesia yang diakui UNESCO dalam Creative Cities Network (2015), berkat inovasi di desain dan budaya.<br><small>Sumber: UNESCO UCCN</small></p>
+  </div>
+  <div class="info-card">
+  <img src="asset/aqi-bandung.jpg" alt="Kualitas Udara Bandung" class="info-image">
+  <h3>Kualitas Udara Bandung</h3>
+  <p id="aqi-info">Memuat data AQI...</p>
+</div>
+ <div class="info-card" id="weather-card">
+  <img src="asset/cuaca-bandung.jpeg" alt="Cuaca Bandung" class="info-image">
+  <h3>Laporan Cuaca</h3>
+  <p id="weather-info">Memuat data cuaca...</p>
+</div>
+  <div class="info-card">
+    <img src="asset/peta-bandung.png" alt="Peta Bandung" class="info-image">
+    <h3>Informasi Spasial</h3>
+    <p>Koordinat: 6.9175° S, 107.6191° E | Luas: ±167 km². Bandung terletak dalam cekungan Bandung dan dikelilingi pegunungan. <br><small>Sumber: Bappeda Kota Bandung</small></p>
+  </div>
+</section>
+
+<footer id="footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>Tentang WebGIS Kota Bandung</h3>
+      <p>Platform pemetaan interaktif untuk memvisualisasikan dan menganalisis data spasial Kota Bandung. Dikembangkan sebagai alat untuk perencanaan kota dan edukasi.</p>
+    </div>
+
+    <div class="footer-section">
+      <h3>Kontak Kami</h3>
+      <div class="contact-info">
+        <div class="contact-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>Jl. Rancamulya No.15, Bandung</span>
+        </div>
+        <div class="contact-item">
+          <i class="fas fa-envelope"></i>
+          <span>frisckaa22@upi.edu</span>
+        </div>
+        <div class="contact-item">
+          <i class="fas fa-phone"></i>
+          <span>+62 856241118875</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-developer">
+    <h3>Tentang Pengembang</h3>
+    <div class="developer-info">
+      <img src="./asset/foto-friscka.jpg" alt="Foto Friscka Fitri Aditama" class="developer-photo">
+      <div class="developer-text">
+        <p><strong>Friscka Fitri Aditama</strong></p>
+        <p>Mahasiswa Sains Informasi Geografi, Universitas Pendidikan Indonesia</p>
+        <p>NIM: 2309831 | Angkatan 2023</p>
+        <p>Website ini dibuat sebagai bagian dari tugas mata kuliah WebGIS. Menggunakan teknologi HTML, CSS, dan JavaScript dengan pendekatan desain responsif.</p>
+        <div class="social-icons">
+          <a href="https://github.com/bleachedd" target="_blank"><i class="fab fa-github"></i></a>
+          <a href="https://www.linkedin.com/in/friscka-aditama-7a87072bb" target="_blank"><i class="fab fa-linkedin"></i></a>
+          <a href="https://www.instagram.com/frisckaditama" target="_blank"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="copyright">
+    <p>© 2025 WebGIS Kota Bandung</p>
+  </div>
+</footer>
+
+<!-- JavaScript Libraries -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
+<script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
+<script src="https://unpkg.com/leaflet-measure@2.1.7/dist/leaflet-measure.js"></script>
+
+<script>
+// Mobile Menu Toggle
+document.getElementById('menu-toggle').addEventListener('click', function() {
+  document.getElementById('main-nav').classList.toggle('active');
+});
+
+// Smooth Scrolling for Navigation Links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    document.querySelector(this.getAttribute('href')).scrollIntoView({
+      behavior: 'smooth'
+    });
+  });
+});
+
+// Initialize map with custom options
+const map = L.map('map', {
+  zoomControl: false,
+  attributionControl: false
+}).setView([-6.903, 107.6510], 13);
+
+// Custom zoom control position
+L.control.zoom({
+  position: 'bottomright'
+}).addTo(map);
+
+// Custom attribution
+L.control.attribution({
+  position: 'bottomleft',
+  prefix: '© WebGIS Kota Bandung | Data by OpenStreetMap'
+}).addTo(map);
+
+// Basemaps with custom styles
+const basemapOSM = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '&copy; OpenStreetMap'
+}).addTo(map);
+
+const osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap contributors, HOT'
+});
+
+const baseMapGoogle = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+  maxZoom: 20,
+  attribution: 'Map by Google',
+  subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+});
+
+const satelliteMapGoogle = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+  maxZoom: 20,
+  attribution: 'Imagery by Google',
+  subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+});
+
+const darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; CartoDB',
+  subdomains: 'abcd',
+  maxZoom: 19
+});
+
+// Controls with custom styling
+// Fullscreen control
+map.addControl(new L.Control.Fullscreen({
+  position: 'topright',
+  title: {
+    'false': 'View Fullscreen',
+    'true': 'Exit Fullscreen'
+  }
+}));
+
+// Home button for resetting view
+const homeButton = L.easyButton({
+  position: 'topright',
+  states: [{
+    stateName: 'default-state',
+    icon: 'fa-home',
+    title: 'Reset View',
+    onClick: function(btn, map) {
+      map.setView([-6.903, 107.6510], 13);
+    }
+  }]
+});
+homeButton.addTo(map);
+
+// Locate control with custom options
+const locateControl = L.control.locate({
+  position: 'topright',
+  strings: {
+    title: "Lokasi Saya"
+  },
+  locateOptions: {
+    enableHighAccuracy: true,
+    maxZoom: 16
+  }
+}).addTo(map);
+
+// Set up the measure control
+const measureControl = L.control.measure({
+  position: 'topright',
+  primaryLengthUnit: 'meters',
+  secondaryLengthUnit: 'kilometers',
+  primaryAreaUnit: 'sqmeters',
+  secondaryAreaUnit: 'hectares',
+  activeColor: '#BE5B50',
+  completedColor: '#641B2E'
+});
+measureControl.addTo(map);
+
+
+// Variables for layer states
+let legendVisible = true;
+let measureActive = false;
+
+// Reset view button functionality
+document.getElementById('reset-view').addEventListener('click', function() {
+  map.setView([-6.903, 107.6510], 13);
+});
+
+// Toggle legend button functionality
+document.getElementById('toggle-legend').addEventListener('click', function() {
+  if (legendVisible) {
+    document.querySelector('.info.legend').style.display = 'none';
+    legendVisible = false;
+    this.innerHTML = '<i class="fas fa-list"></i> Show Legend';
+  } else {
+    document.querySelector('.info.legend').style.display = 'block';
+    legendVisible = true;
+    this.innerHTML = '<i class="fas fa-list"></i> Hide Legend';
+  }
+});
+
+// Measure tool button functionality
+document.getElementById('measure-tool').addEventListener('click', function() {
+  if (measureActive) {
+    map.removeControl(measureControl);
+    measureActive = false;
+    this.innerHTML = '<i class="fas fa-ruler"></i> Ukur Jarak';
+  } else {
+    measureControl.addTo(map);
+    measureActive = true;
+    this.innerHTML = '<i class="fas fa-times"></i> Tutup Ukur';
+  }
+});
+
+
+// Enhanced point symbology
+const symbologyPoint = {
+  radius: 8,
+  fillColor: "#8A2D3B",
+  color: "#641B2E",
+  weight: 2,
+  opacity: 1,
+  fillOpacity: 0.8
+};
+
+// Layer: Jembatan PT
+const jembatanPT = L.layerGroup();
+$.getJSON("./asset/data-spasial/jembatan_pt.geojson", function (data) {
+  L.geoJSON(data, {
+    pointToLayer: function (feature, latlng) {
+      return L.circleMarker(latlng, symbologyPoint).on('mouseover', function (e) {
+        this.setStyle({
+          radius: 12,
+          fillColor: "#FBDB93"
+        });
+      }).on('mouseout', function (e) {
+        this.setStyle(symbologyPoint);
+      });
+    },
+    onEachFeature: function(feature, layer) {
+      if (feature.properties) {
+        const popupContent = `
+          <div class="custom-popup">
+            <div class="popup-header">Informasi Jembatan</div>
+            <div class="popup-content">
+              <p><strong>ID:</strong> ${feature.properties.id || 'N/A'}</p>
+              <p><strong>Nama:</strong> ${feature.properties.name || 'Jembatan'}</p>
+              <p><strong>Kondisi:</strong> ${feature.properties.condition || 'Baik'}</p>
+            </div>
+          </div>
+        `;
+        layer.bindPopup(popupContent);
+      }
+    }
+  }).addTo(jembatanPT);
+});
+jembatanPT.addTo(map);
+
+// Layer: Administrasi Kelurahan with enhanced styling
+const adminKelurahanAR = L.layerGroup();
+$.getJSON("./asset/data-spasial/admin_kelurahan_ln.geojson", function (data) {
+  L.geoJSON(data, {
+    style: function(feature) {
+      return {
+        color: "#641B2E",
+        weight: 3,
+        opacity: 0.7,
+        dashArray: '5, 10',
+        lineJoin: 'round'
+      };
+    },
+    onEachFeature: function(feature, layer) {
+      if (feature.properties) {
+        const popupContent = `
+          <div class="custom-popup">
+            <div class="popup-header">Informasi Administrasi</div>
+            <div class="popup-content">
+              <p><strong>Kelurahan:</strong> ${feature.properties.KELURAHAN || feature.properties.name || 'N/A'}</p>
+              <p><strong>Kecamatan:</strong> ${feature.properties.KECAMATAN || 'N/A'}</p>
+            </div>
+          </div>
+        `;
+        layer.bindPopup(popupContent);
+      }
+      
+      layer.on({
+        mouseover: function(e) {
+          layer.setStyle({
+            weight: 5,
+            color: "#BE5B50",
+            opacity: 1
+          });
+        },
+        mouseout: function(e) {
+          layer.setStyle({
+            weight: 3,
+            color: "#641B2E",
+            opacity: 0.7,
+            dashArray: '5, 10'
+          });
+        }
+      });
+    }
+  }).addTo(adminKelurahanAR);
+});
+adminKelurahanAR.addTo(map);
+
+// Layer: Land Cover with enhanced styling and interactivity
+const landcover = L.layerGroup();
+$.getJSON("./asset/data-spasial/landcover_ar.geojson", function (data) {
+  L.geoJSON(data, {
+    style: function (feature) {
+      // Custom color map for each landcover type
+      const colorMap = {
+        'Danau/Situ': { fill: "#97DBF2", border: "#4065EB" },
+        'Empang': { fill: "#97DBF2", border: "#4065EB" },
+        'Sungai': { fill: "#97DBF2", border: "#4065EB" },
+        'Hutan Rimba': { fill: "#38A800", border: "#38A800" },
+        'Perkebunan/Kebun': { fill: "#E9FFBE", border: "#38A800" },
+        'Permukiman dan Tempat Kegiatan': { fill: "#FBDB93", border: "#BE5B50" },
+        'Sawah': { fill: "#01FBBB", border: "#4065EB" },
+        'Semak Belukar': { fill: "#C9F4CA", border: "#00A52F" },
+        'Tanah Kosong/Gundul': { fill: "#FDFDFD", border: "#BE5B50" },
+        'Tegalan/Ladang': { fill: "#EDFF85", border: "#38A800" },
+        'Vegetasi Non Budidaya Lainnya': { fill: "#8BC276", border: "#38A800" }
+      };
+      
+      const landType = feature.properties.REMARK;
+      const colors = colorMap[landType] || { fill: "#CCCCCC", border: "#999999" };
+      
+      return {
+        fillColor: colors.fill,
+        fillOpacity: 0.6,
+        color: colors.border,
+        weight: 1,
+        opacity: 0.8
+      };
+    },
+    onEachFeature: function (feature, layer) {
+      // Enhanced popup with additional information
+      const area = feature.properties.SHAPE_Area ? (feature.properties.SHAPE_Area / 10000).toFixed(2) + ' Ha' : 'Tidak tersedia';
+      
+      const popupContent = `
+        <div class="custom-popup">
+          <div class="popup-header">Informasi Tutupan Lahan</div>
+          <div class="popup-content">
+            <p><strong>Jenis:</strong> ${feature.properties.REMARK}</p>
+            <p><strong>Luas Area:</strong> ${area}</p>
+          </div>
+        </div>
+      `;
+      
+      layer.bindPopup(popupContent);
+      
+      // Hover effects
+      layer.on({
+        mouseover: function(e) {
+          layer.setStyle({
+            fillOpacity: 0.85,
+            weight: 3
+          });
+        },
+        mouseout: function(e) {
+          layer.setStyle({
+            fillOpacity: 0.6,
+            weight: 1
+          });
+        }
+      });
+    }
+  }).addTo(landcover);
+});
+landcover.addTo(map);
+
+// Enhanced Layer controls with custom styling
+const baseMaps = {
+  "OpenStreetMap": basemapOSM,
+  "OSM Humanitarian": osmHOT,
+  "Google Maps": baseMapGoogle,
+  "Google Satellite": satelliteMapGoogle,
+  "Dark Mode": darkMap
+};
+
+const overlayMaps = {
+  "Tutupan Lahan": landcover,
+  "Batas Administrasi": adminKelurahanAR,
+  "Jembatan": jembatanPT
+};
+
+const layerControl = L.control.layers(baseMaps, overlayMaps, {
+  position: 'topright',
+  collapsed: false
+}).addTo(map);
+
+// Enhanced Legend
+const legend = L.control({position: 'bottomleft'});
+
+legend.onAdd = function (map) {
+  const div = L.DomUtil.create('div', 'info legend');
+  div.innerHTML = `
+    <h4>Legenda Tutupan Lahan</h4>
+    <div class="legend-items">
+      <div class="legend-item">
+        <span class="legend-color" style="background: #97DBF2;"></span>
+        <span>Danau/Situ/Empang/Sungai</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #38A800;"></span>
+        <span>Hutan Rimba</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #E9FFBE;"></span>
+        <span>Perkebunan/Kebun</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #FBDB93;"></span>
+        <span>Permukiman dan Tempat Kegiatan</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #01FBBB;"></span>
+        <span>Sawah</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #C9F4CA;"></span>
+        <span>Semak Belukar</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #FDFDFD;"></span>
+        <span>Tanah Kosong/Gundul</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #EDFF85;"></span>
+        <span>Tegalan/Ladang</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #8BC276;"></span>
+        <span>Vegetasi Non Budidaya Lainnya</span>
+      </div>
+    </div>
+    
+    <h4 style="margin-top: 15px;">Simbol Lainnya</h4>
+    <div class="legend-items">
+      <div class="legend-item">
+        <span class="legend-color" style="background: #8A2D3B; border-radius: 50%;"></span>
+        <span>Jembatan</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: transparent; border: 2px dashed #641B2E;"></span>
+        <span>Batas Administrasi</span>
+      </div>
+    </div>
+  `;
+  return div;
+};
+
+legend.addTo(map);
+
+// Add info panel on the top left
+const infoPanel = L.control({position: 'topleft'});
+
+infoPanel.onAdd = function (map) {
+  const div = L.DomUtil.create('div', 'info');
+  div.style.padding = '6px 8px';
+  div.style.background = 'rgba(255,255,255,0.8)';
+  div.style.borderRadius = '5px';
+  div.style.boxShadow = '0 0 15px rgba(0,0,0,0.2)';
+  div.innerHTML = '<h4 style="margin: 0 0 5px; color: #641B2E;">Kota Bandung</h4>' + 
+                  '<p style="margin: 0; font-size: 12px;">Hover pada area untuk melihat informasi</p>';
+  return div;
+};
+
+infoPanel.addTo(map);
+
+
+
+// Add scale control
+L.control.scale({
+  metric: true,
+  imperial: false,
+  position: 'bottomleft'
+}).addTo(map);
+
+// Add smooth scroll animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('section').forEach(section => {
+  observer.observe(section);
+});
+
+// Preloader
+window.addEventListener('load', function() {
+  // Add preloader animation here if needed
+  console.log('WebGIS Kota Bandung loaded successfully');
+});
+
+// Add layer switcher animation
+document.querySelector('.leaflet-control-layers-toggle').addEventListener('click', function() {
+  console.log('Layer control toggled');
+});
+
+// Helper function for responsiveness
+function handleResponsive() {
+  if (window.innerWidth <= 768) {
+    // Mobile-specific adjustments
+    map.setMinZoom(11);
+  } else {
+    // Desktop-specific adjustments
+    map.setMinZoom(10);
+  }
+}
+
+// Run on load and resize
+handleResponsive();
+window.addEventListener('resize', handleResponsive);
+
+// Statistics counter animation
+function animateValue(id, start, end, duration) {
+  if (document.getElementById(id)) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const value = Math.floor(progress * (end - start) + start);
+      document.getElementById(id).textContent = value;
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }
+}
+
+// Welcome message
+console.log('Welcome to WebGIS Kota Bandung - Interactive Spatial Exploration');
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('bandungChart').getContext('2d');
+const bandungChart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ['Wisatawan', 'Hotel', 'Kuliner', 'Transportasi', 'Event'],
+    datasets: [{
+      label: 'Indeks Populer Bandung',
+      data: [85, 70, 90, 60, 75],
+      backgroundColor: [
+        '#641B2E',
+        '#8A2D3B',
+        '#BE5B50',
+        '#FBDB93',
+        '#333'
+      ],
+      borderRadius: 5
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+</script>
+<script>
+    const apiKey = "11ff8556f92661caf8575a96a8c7950c";
+    const aqiApiKey = "ebeed99cd6b48352766114c4ce184ad6fb952821"; // Ganti dengan token WAQI yang valid
+    const lat = -6.9147;
+    const lon = 107.6098;
+
+    // Ambil data cuaca dari OpenWeatherMap
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=id`;
+
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        const cuaca = data.weather[0].description;
+        const suhu = data.main.temp;
+        const kelembapan = data.main.humidity;
+        const angin = data.wind.speed;
+        const waktu = new Date().toLocaleString("id-ID", {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+          timeZone: 'Asia/Jakarta'
+        });
+
+        const weatherHTML = `
+          <strong>${cuaca.charAt(0).toUpperCase() + cuaca.slice(1)}</strong><br
+          🌡️ Suhu: ${suhu}°C<br>
+          💧 Kelembapan: ${kelembapan}%<br>
+          💨 Angin: ${angin} m/s<br>
+          ⏰ Update: ${waktu} WIB<br>
+          <small>Sumber: OpenWeatherMap</small>
+        `;
+        document.getElementById("weather-info").innerHTML = weatherHTML;
+      })
+      .catch(error => {
+        document.getElementById("weather-info").innerHTML = "Gagal memuat data cuaca.";
+        console.error("Cuaca Error:", error);
+      });
+
+    // Ambil data AQI dari WAQI
+    const aqiUrl = `https://api.waqi.info/feed/geo:${lat};${lon}/?token=${aqiApiKey}`;
+
+    fetch(aqiUrl)
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "ok") {
+          const aqi = data.data.aqi;
+          const dominan = data.data.dominentpol || "-";
+          const waktu = new Date().toLocaleString("id-ID", {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'Asia/Jakarta'
+          });
+
+          const aqiHTML = `
+            <strong>Indeks Kualitas Udara: ${aqi}</strong><br>
+            🧪 Polutan Dominan: ${dominan.toUpperCase()}<br>
+            ⏰ Update: ${waktu} WIB<br>
+            <small>Sumber: World Air Quality Index</small>
+          `;
+          document.getElementById("aqi-info").innerHTML = aqiHTML;
+        } else {
+          document.getElementById("aqi-info").innerHTML = "Gagal memuat data AQI.";
+        }
+      })
+      .catch(error => {
+        document.getElementById("aqi-info").innerHTML = "Terjadi kesalahan saat mengambil data AQI.";
+        console.error("AQI Error:", error);
+      });
+    </script>
+</body>
+</html>
