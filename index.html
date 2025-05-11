@@ -11,41 +11,136 @@
   <link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    :root {
-      --primary: #641B2E;
-      --secondary: #8A2D3B;
-      --tertiary: #BE5B50;
-      --accent: #FBDB93;
-      --dark: #333;
-      --light: #f9f9f9;
-    }
-    
-    body, html { 
-      margin: 0; 
-      padding: 0; 
-      font-family: 'Poppins', sans-serif; 
-      scroll-behavior: smooth;
-      color: var(--dark);
-      background-color: var(--light);
-    }
+<style>
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
-  /* Header Styles */
+:root {
+  /* Light mode colors (default) */
+  --primary: #2C2C2C;     /* Darkest (charcoal) */
+  --secondary: #522546;   /* Dark purple */
+  --tertiary: #88304E;    /* Medium pink-purple */
+  --accent: #F7374F;      /* Bright pink-red */
+  --accent-light: #F96E7F; /* Lighter accent for hover effects */
+  --dark: #333333;        /* Dark text */
+  --light: #f9f9f9;       /* Light background */
+  --neutral: #E8E0E0;     /* Light gray */
+  --shadow: rgba(44, 44, 44, 0.15); /* Shadow */
+  --card-bg: white;
+  --text-primary: #333333;
+  --text-secondary:  #1E1818;
+  --border-color: #E8E0E0;
+  --hover-overlay: rgba(44, 44, 44, 0.05);
+  
+  /* Font variables */
+  --heading-font: 'Playfair Display', serif;
+  --body-font: 'Poppins', sans-serif;
+  
+  /* Transition speeds */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+}
+
+/* Dark mode colors */
+[data-theme="dark"] {
+  --primary: #2C2C2C;     /* Keep the same primary for consistency */
+  --secondary: #522546;   /* Keep the same secondary for consistency */
+  --tertiary: #88304E;    /* Same pink-purple */
+  --accent: #F7374F;      /* Same bright pink-red */
+  --accent-light: #F96E7F; /* Lighter accent for hover effects */
+  --dark: #E8E0E0;        /* Light text on dark background */
+  --light: #1E1818;       /* Dark background */
+  --neutral: #2D2424;     /* Dark neutral background */
+  --shadow: rgba(0, 0, 0, 0.3); /* Darker shadow */
+  --card-bg: #2D2424;     /* Card background in dark mode */
+  --text-primary: #f9f9f9;       /* Dark background */
+  --text-secondary: #F96E7F ;       /* Dark background */
+  --border-color: #522546; /* Border color in dark mode */
+  --hover-overlay: rgba(247, 55, 79, 0.1); /* Hover overlay in dark mode */
+}
+/* Theme toggle animations */
+.theme-transition {
+  transition: background-color var(--transition-normal), 
+              color var(--transition-normal), 
+              border-color var(--transition-normal), 
+              box-shadow var(--transition-normal);
+}
+
+body, html { 
+  margin: 0; 
+  padding: 0; 
+  font-family: var(--body-font);
+  scroll-behavior: smooth;
+  color: var(--text-primary);
+  background-color: var(--light);
+  line-height: 1.6;
+  transition: background-color var(--transition-normal), 
+              color var(--transition-normal);
+  font-size: 16px;
+  font-weight: 300;
+}
+
+/* Account for fixed header */
+body {
+  padding-top: 76px;
+}
+
+/* All headings use the heading font */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--heading-font);
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--tertiary));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 15px var(--shadow);
+  z-index: 1000;
+  transition: transform var(--transition-normal), 
+              box-shadow var(--transition-normal);
+}
+
+.theme-toggle:hover {
+  transform: translateY(-3px) rotate(15deg);
+  box-shadow: 0 6px 20px var(--shadow);
+}
+
+.theme-toggle i {
+  font-size: 1.5rem;
+}
+
+/* Header Styles */
 header {
-  background-color: var(--primary); 
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white; 
   padding: 0.8rem 2rem;
   display: flex; 
   justify-content: space-between; 
   align-items: center;
-  position: fixed; /* Mengubah dari sticky menjadi fixed untuk memastikan posisi tetap */
+  position: fixed;
   top: 0; 
   left: 0;
   right: 0;
-  z-index: 9999; /* Meningkatkan z-index untuk memastikan berada di atas semua elemen */
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  z-index: 9999;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  transition: background var(--transition-normal), 
+              box-shadow var(--transition-normal);
 }
 
 header .logo { 
@@ -55,17 +150,29 @@ header .logo {
 }
 
 header .logo img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  border-radius: 6px;
   object-fit: cover;
-  border: 2px solid var(--accent);
+  border: 2px solid var(--accent-light);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  transition: transform var(--transition-normal), 
+              border-color var(--transition-normal), 
+              box-shadow var(--transition-normal);
+}
+
+header .logo img:hover {
+  transform: scale(1.05);
+  border-color: white;
 }
 
 header .logo h2 {
   font-weight: 600;
   margin: 0;
-  color: var(--accent);
+  color: white;
+  letter-spacing: 0.5px;
+  font-family: var(--heading-font);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 header nav ul { 
@@ -81,465 +188,943 @@ header nav a {
   text-decoration: none; 
   font-weight: 500;
   padding: 0.5rem 1rem;
-  border-radius: 20px;
-  transition: all 0.3s ease;
+  border-radius: 6px;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+header nav a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: white;
+  transition: width var(--transition-normal);
+}
+
+header nav a:hover::after {
+  width: 100%;
 }
 
 header nav a:hover {
-  background-color: var(--accent);
-  color: var(--primary);
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
 }
 
-/* Menambahkan padding-top pada body/main content untuk kompensasi header fixed */
-body {
-  padding-top: 80px; /* Sesuaikan dengan tinggi header Anda */
-}
-
-    /* Hero Section */
-  
+/* Hero Section */
 .hero-section {
-  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-              url('asset/alun alun bandung1.jpg') center/cover no-repeat;
+  background: linear-gradient(rgba(62, 50, 50, 0.85), rgba(80, 60, 60, 0.75)),
+              url('asset/alun alun bandung1.jpg') center/cover no-repeat fixed;
   color: white;
   text-align: center;
   padding: 8rem 2rem;
   position: relative;
+  transition: background var(--transition-normal);
+  border-bottom: 4px solid var(--accent);
 }
 
-
 .hero-content {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   z-index: 2;
+  animation: fadeIn 1s ease-out;
 }
 
 .hero-section h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  color: var(--accent);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  font-size: 3.2rem;
+  margin-bottom: 1.4rem;
+  color: white;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  font-family: var(--heading-font);
+  line-height: 1.2;
 }
 
 .hero-section p {
   font-size: 1.2rem;
-  margin-bottom: 2rem;
-  line-height: 1.6;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 0.95;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  font-weight: 300;
 }
 
- .cta-button {
+.cta-button {
   display: inline-block;
-  background-color: var(--primary);
-  color: var(--accent);
-  padding: 0.75rem 1.5rem;
-  border-radius: 50px;
-  font-size: 1rem;
+  background: linear-gradient(135deg, var(--accent-light), var(--accent));
+  color: var(--light);
+  color: 0;
+  padding: 0.9rem 2.2rem;
+  border-radius: 30px;
+  font-size: 1.05rem;
+  font-weight: 500;
   text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px var(--dark);
+  transition: all var(--transition-normal);
+  box-shadow: 0 4px 15px var(--shadow);
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
 }
 
-.cta-button:hover {
-  background-color: var(--primary);
-  color: var(--bg);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px --light;
+.cta-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(135deg, var(--accent), var(--tertiary));
+  transition: width var(--transition-slow);
+  z-index: -1;
+  border-radius: 30px;
 }
 
-/* Animation */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.cta-button:hover::before {
+  width: 100%;
 }
 
+/* Dark Mode Hero Section */
+[data-theme="dark"] .hero-section {
+  background: linear-gradient(rgba(10, 10, 15, 0.9), rgba(15, 15, 25, 0.85)),
+              url('asset/alun alun bandung1.jpg') center/cover no-repeat fixed;
+  color: #f0f0f0;
+  border-bottom: 4px solid var(--accent-dark, --accent-lightss);
+}
 
-    /* Map Section */
-    #map-section { 
-      padding: 4rem 2rem; 
-      background: var(--light);
-    }
-    
-    .section-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    
-    .section-header h2 {
-      color: var(--primary);
-      font-size: 2.2rem;
-      margin-bottom: 1rem;
-      position: relative;
-      display: inline-block;
-    }
-    
-    .section-header h2::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      width: 60%;
-      height: 4px;
-      background-color: var(--tertiary);
-      transform: translateX(-50%);
-      border-radius: 2px;
-    }
-    
-    .section-header p {
-      color: var(--secondary);
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    
-    .map-container {
-      position: relative;
-      margin-top: 2rem;
-    }
-    
-    #map { 
-      height: 450px; 
-      width: 100%; 
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-    }
-    
-    .map-tools {
-      display: flex;
-      justify-content: center;
-      margin-top: 1.5rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    
-    .tool-button {
-      padding: 0.6rem 1.2rem;
-      background-color: var(--tertiary);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.2s ease;
-    }
-    
-    .tool-button:hover {
-      background-color: var(--secondary);
-    }
-    
-    .tool-button i {
-      font-size: 1rem;
-    }
-    
-    /* Information Cards */
-.info-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.8rem;
+[data-theme="dark"] .hero-section h1 {
+  color: #f0f0f0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .hero-section p {
+  opacity: 0.9;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .cta-button {
+  background: linear-gradient(135deg, var(--tertiary-dark, #7030a0), var(--accent-dark, #9147ff));
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .cta-button::before {
+  background: linear-gradient(135deg, var(--accent-dark, #9147ff), var(--tertiary-dark, #7030a0));
+}
+
+[data-theme="dark"] .cta-button:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+/* Map Section */
+#map-section { 
+  padding: 6rem 2rem; 
+  background: var(--light);
+  transition: background-color var(--transition-normal);
+  position: relative;
+}
+
+#map-section::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(to bottom, transparent, var(--light));
+  z-index: 1;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.section-header h2 {
+  color: var(--tertiary);
+  font-size: 2.3rem;
+  margin-bottom: 1.2rem;
+  position: relative;
+  display: inline-block;
+  font-weight: 600;
+  transition: color var(--transition-normal);
+  font-family: var(--heading-font);
+}
+
+.section-header h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(to right, var(--tertiary), var(--accent));
+  transform: translateX(-50%);
+  border-radius: 2px;
+  transition: background var(--transition-normal);
+}
+
+.section-header p {
+  color: var(--text-secondary);
+  max-width: 800px;
+  margin: 1.2rem auto 0;
+  opacity: 0.85;
+  transition: color var(--transition-normal);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.map-container {
+  position: relative;
+  margin-top: 2.5rem;
+}
+
+#map { 
+  height: 500px; 
+  width: 100%; 
+  border-radius: 10px;
+  box-shadow: 0 10px 30px var(--shadow);
+  transition: box-shadow var(--transition-normal);
+  border: 3px solid var(--neutral);
+}
+
+.map-tools {
+  display: flex;
+  justify-content: center;
   margin-top: 2rem;
-  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tool-button {
+  padding: 0.8rem 1.6rem;
+  background: linear-gradient(135deg, var(--secondary), var(--tertiary));
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: all var(--transition-normal);
+  box-shadow: 0 4px 10px var(--shadow);
+  letter-spacing: 0.5px;
+}
+
+.tool-button:hover {
+  background: linear-gradient(135deg, var(--tertiary), var(--secondary));
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px var(--shadow);
+}
+
+.tool-button i {
+  font-size: 1.1rem;
+}
+
+@import url('https://fonts.googleapis.com/css?family=Roboto+Slab:100,300,400,700');
+@import url('https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i');
+
+/* Circular Information Cards with Enhanced Animation */
+.info-cards {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  max-width: 1200px;
+  margin: 3rem auto;
+  padding: 0 2rem;
 }
 
 .info-card {
-  background: var(--accent);
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(138, 45, 59, 0.8);
-  transition: transform 0.3s;
+  width: calc(33.3% - 25px);
+  min-width: 280px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0px 13px 10px -7px rgba(0, 0, 0, 0.1);
+  transition: all .4s cubic-bezier(0.175, 0.885, 0, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .info-card:hover {
-  transform: translateY(-5px);
+  box-shadow: 0px 30px 18px -8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.10, 1.10);
 }
 
-.info-card h3 {
-  color: var(--primary);
-  margin-bottom: 1rem;
+.info-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--tertiary, #8E2DE2), var(--highlight, #4A00E0));
+  transition: height 0.4s ease;
+  z-index: 3;
 }
 
-.info-card p {
-  font-size: 0.95rem;
-  color: var(--dark);
+.info-card:hover::before {
+  height: 8px;
 }
-    /* Footer */
-    footer {
-      background: var(--primary); 
-      color: var(--light); 
-      padding: 2rem;
-    }
-    
-    .footer-content {
+
+.info-image-container {
+  width: 100%;
+  height: 235px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+}
+
+.info-image-bg {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: 0.3s all ease-out;
+}
+
+.info-card:hover .info-image-bg {
+  height: 100%;
+  opacity: 0.3;
+  transform: scale(1.1);
+}
+
+.info-image-overlay {
+  position: absolute;
+  padding: 16px;
+  width: 100%;
+  opacity: 0;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  transition: opacity 0.3s ease;
   display: flex;
-  justify-content: center; /* <--- ini yang menggeser ke tengah */
-  gap: 60px; /* jarak antar kolom */
-  flex-wrap: wrap;
-  text-align: left;
-}
- .footer-section {
-  max-width: 300px;
+  justify-content: space-between;
 }
 
-    .footer-section h3 {
-      color: var(--accent);
-      margin-bottom: 1rem;
-      position: relative;
-    }
-
-    .footer-section h3::after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 0;
-      width: 50px;
-      height: 2px;
-      background-color: var(--accent);
-    }
-    .footer-developer {
-  text-align: center; /* Menjadikan teks di dalam div footer-developer menjadi rata tengah */
-  padding: 20px;
+.info-card:hover .info-image-overlay {
+  opacity: 1;
 }
 
-.footer-developer h3 {
-  font-size: 1.5rem;
-  margin-bottom: 15px;
-}
-
-.developer-info {
-  display: inline-block; /* Menggunakan inline-block agar konten di dalamnya dapat tersusun dengan baik */
-  text-align: center;
-}
-
-.developer-photo {
-  width: 120px; /* Sesuaikan ukuran gambar */
-  height: 120px;
+.info-image-circle {
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--neutral, #fff);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.info-card:hover .info-image-circle {
+  border-color: var(--tertiary, #8E2DE2);
+  transform: translate(-50%, -50%) scale(1.05) rotate(3deg);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.info-content {
+  padding: 16px 24px 24px 24px;
+  background-color: #fff;
+  border-radius: 0 0 12px 12px;
+  z-index: 2;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+.info-card:hover .info-content {
+  background-color: transparent;
+}
+
+.info-category {
+  font-family: 'Raleway', sans-serif;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 2px;
+  font-weight: 500;
+  color: #868686;
   margin-bottom: 10px;
 }
 
-
-    
-    .contact-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-    
-    .contact-item {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-    }
-    
-    .social-icons {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    
-    .social-icons a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      background-color: rgba(255,255,255,0.1);
-      border-radius: 50%;
-      color: white;
-      transition: all 0.3s ease;
-    }
-    
-    .social-icons a:hover {
-      background-color: var(--accent);
-      color: var(--primary);
-      transform: translateY(-3px);
-    }
-    
-
-/* Information Cards */
-.info-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
-}
-.info-image {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-}
-
-
-.info-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  transition: transform 0.3s;
-}
-
-.info-card:hover {
-  transform: translateY(-5px);
-}
-
 .info-card h3 {
-  color: var(--primary);
-  margin-bottom: 1rem;
+  color: var(--primary, #333);
+  margin: 5px 0 10px;
+  font-weight: 600;
+  font-size: 1.25rem;
+  font-family: 'Roboto Slab', serif;
+  position: relative;
+  text-align: center;
+  padding-bottom: 0.8rem;
+}
+
+.info-card h3::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 30%;
+  right: 30%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--neutral, #ccc), var(--tertiary, #8E2DE2), var(--neutral, #ccc));
+  border-radius: 2px;
+  transition: all 0.4s ease;
+}
+
+.info-card:hover h3::after {
+  left: 20%;
+  right: 20%;
+  background: linear-gradient(90deg, var(--tertiary, #8E2DE2), var(--highlight, #4A00E0), var(--tertiary, #8E2DE2));
 }
 
 .info-card p {
   font-size: 0.95rem;
-  color: var(--dark);
-}
-.info-card p {
-    text-align: justify;
-}
-.info-icon {
+  color: var(--text-secondary, #111010);
+  line-height: 1.7;
   text-align: center;
-  margin: 0.5rem 0;
-  color: var(--primary); /* atau sesuaikan dengan tema warna */
+  transition: all 0.3s ease;
 }
 
-.info.legend {
-    background: white;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    line-height: 1.3;
-    color: var(--dark);
-    max-width: 200px;
-    font-size: 12px;
+.info-card:hover p {
+  color: var(--primary, #333);
+}
 
-    position: absolute;
-    top: 50%;
-    left: 4px;
-    transform: translateY(-110%);
+.info-meta {
+  display: flex;
+  color: #1E1818;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 12px;
+}
+
+.info-icon {
+  color: var(--tertiary, --primary);
+  font-size: 1.2rem;
+  transition: all 0.5s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.info-card:hover .info-icon {
+  color: var(--highlight, #4A00E0);
+  transform: scale(1.2) rotate(15deg);
+}
+
+.info-clock-info {
+  display: flex;
+  align-items: center;
+  color: #AD7D52;
+}
+
+.info-time {
+  margin-left: 5px;
+}
+
+/* Ensure responsiveness */
+@media (max-width: 960px) {
+  .info-card {
+    width: calc(50% - 25px);
+  }
+}
+
+@media (max-width: 768px) {
+  .info-cards {
+    gap: 20px;
+  }
+  
+  .info-image-circle {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media (max-width: 576px) {
+  .info-card {
+    width: 100%;
+    max-width: 350px;
+  }
+  
+  .info-image-circle {
+    width: 130px;
+    height: 130px;
+  }
+}
+/* Footer */
+footer {
+  background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+  color: white; 
+  padding: 4rem 2rem 2.5rem;
+  transition: background var(--transition-normal);
+  position: relative;
+}
+
+footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to right, var(--tertiary), var(--accent), var(--tertiary));
+}
+
+.footer-content {
+  display: flex;
+  justify-content: center;
+  gap: 70px;
+  flex-wrap: wrap;
+  text-align: left;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-section {
+  max-width: 300px;
+}
+
+.footer-section h3 {
+  color: white;
+  margin-bottom: 1.5rem;
+  position: relative;
+  font-weight: 600;
+  font-family: var(--heading-font);
+  font-size: 1.4rem;
+}
+
+.footer-section h3::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 50px;
+  height: 2px;
+  background-color: var(--accent);
+  transition: width var(--transition-normal), 
+              background-color var(--transition-normal);
+}
+
+.footer-section:hover h3::after {
+  width: 70px;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform var(--transition-fast);
+}
+
+.contact-item:hover {
+  transform: translateX(5px);
+}
+
+.social-icons {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 1.5rem;
+}
+
+.social-icons a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  color: white;
+  transition: all var(--transition-normal);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.social-icons a:hover {
+  background-color: var(--accent);
+  color: var(--primary);
+  transform: translateY(-5px) rotate(10deg);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.footer-developer {
+  text-align: center;
+  padding: 2.5rem 0 0;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  margin-top: 2.5rem;
+  transition: border-color var(--transition-normal);
+}
+
+.footer-developer h3 {
+  font-size: 1.4rem;
+  margin-bottom: 1.2rem;
+  color: white;
+  font-family: var(--heading-font);
+}
+
+/* Developer Card Animation */
+.developer-card {
+  width: 600px;
+  height: 400px;
+  margin: 0 auto;
+  position: relative;
+  perspective: 1000px;
+}
+
+.developer-card .container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.developer-card .card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.developer-card .slide {
+  width: 100%;
+  height: 200px;
+  transition: 0.5s;
+  overflow: hidden;
+}
+
+.developer-card .slide.slide1 {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  transition: 0.7s;
+  transform: translateY(100px);
+  background: var(--accent);
+  border-radius: 10px 10px 0 0;
+}
+
+.developer-card:hover .slide.slide1 {
+  transform: translateY(0px);
+}
+
+.developer-card .icon {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.developer-photo {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 4px solid white;
+  transition: transform var(--transition-normal);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  object-fit: cover;
+}
+
+.developer-card:hover .developer-photo {
+  transform: scale(1.05);
+}
+
+.developer-card .slide.slide2 {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  transition: 0.8s;
+  transform: translateY(-100px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  background: white;
+  border-radius: 0 0 10px 10px;
+}
+
+.developer-card:hover .slide.slide2 {
+  transform: translateY(0);
+}
+
+.developer-card .slide.slide2::after {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 4px;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+}
+
+.developer-card .slide.slide2 .content {
+  text-align: center;
+}
+
+.developer-card .slide.slide2 .content p {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  color: #414141;
+}
+
+.developer-card .slide.slide2 .content h3 {
+  margin: 0 0 10px 0;
+  padding: 0;
+  font-size: 24px;
+  text-align: center;
+  color: #414141;
+}
+
+/* Make footer responsive */
+@media (max-width: 768px) {
+  .footer-content {
+    gap: 40px;
+  }
+  
+  .developer-card {
+    width: 260px;
+  }
+}
+/* Map Legend */
+.info.legend {
+  background: var(--card-bg);
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px var(--shadow);
+  line-height: 1.5;
+  color: var(--text-primary);
+  max-width: 240px;
+  font-size: 12px;
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-110%);
+  transition: background-color var(--transition-normal), 
+              color var(--transition-normal), 
+              box-shadow var(--transition-normal);
+  border-left: 4px solid var(--accent);
 }
 
 .info.legend h4 {
-    margin: 4px 0 4px;
-    color: var(--primary);
-    text-align: center;
-    font-size: 13px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 2px;
+  margin: 0 0 10px;
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 6px;
+  transition: color var(--transition-normal), 
+              border-color var(--transition-normal);
+  font-family: var(--heading-font);
 }
 
 .legend-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 2px;
-    margin-top: 2px;
-    font-size: 11px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 12px;
+  transition: transform var(--transition-fast);
+}
+
+.legend-item:hover {
+  transform: translateX(3px);
 }
 
 .legend-color {
-    width: 14px;
-    height: 14px;
-    margin-right: 6px;
-    border-radius: 2px;
-    border: 1px solid rgba(0,0,0,0.2);
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,0.1);
+  transition: border-color var(--transition-normal);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+[data-theme="dark"] .legend-color {
+  border-color: rgba(255,255,255,0.1);
+}
 
-    /* Popup Styles */
-    .leaflet-popup-content-wrapper {
-      border-radius: 8px;
-      padding: 0;
-      overflow: hidden;
-    }
-    
-    .custom-popup {
-      padding: 0;
-    }
-    
-    .popup-header {
-      background-color: var(--primary);
-      color: white;
-      padding: 10px 15px;
-      font-weight: 600;
-    }
-    
-    .popup-content {
-      padding: 15px;
-    }
-    
-    .popup-content p {
-      margin: 5px 0;
-    }
+/* Popup Styles */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 5px 20px var(--shadow);
+  transition: box-shadow var(--transition-normal);
+}
 
-    /* Responsive Styles */
-    @media (max-width: 768px) {
-      header {
-        flex-direction: column;
-        padding: 1rem;
-      }
-      
-      header .logo {
-        margin-bottom: 1rem;
-      }
-      
-      header nav ul {
-        flex-direction: column;
-        text-align: center;
-        gap: 0.5rem;
-      }
-      
-      .hero-section h1 {
-        font-size: 2rem;
-      }
-      
-      .hero-section p {
-        font-size: 1rem;
-      }
-      
-      #map {
-        height: 300px;
-      }
-      
-      .footer-content {
-        flex-direction: column;
-      }
-    }
-    
-    /* Mobile Menu Toggle */
-    .menu-toggle {
-      display: none;
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-    
-    @media (max-width: 768px) {
-      .menu-toggle {
-        display: block;
-      }
-      
-      header nav {
-        width: 100%;
-      }
-      
-      header nav ul {
-        display: none;
-        width: 100%;
-      }
-      
-      header nav.active ul {
-        display: flex;
-      }
-    }
-    
-  </style>
+.custom-popup {
+  padding: 0;
+}
+
+.popup-header {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  padding: 12px 18px;
+  font-weight: 600;
+  transition: background var(--transition-normal);
+  font-family: var(--heading-font);
+}
+
+.popup-content {
+  padding: 18px;
+  background-color: var(--card-bg);
+  transition: background-color var(--transition-normal);
+}
+
+.popup-content p {
+  margin: 10px 0;
+  color: var(--text-primary);
+  transition: color var(--transition-normal);
+  line-height: 1.6;
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    padding: 1rem;
+  }
+  
+  header .logo {
+    margin-bottom: 1rem;
+  }
+  
+  header nav ul {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.7rem;
+  }
+  
+  .hero-section h1 {
+    font-size: 2.2rem;
+  }
+  
+  .hero-section p {
+    font-size: 1.05rem;
+  }
+  
+  #map {
+    height: 350px;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+    gap: 2.5rem;
+    align-items: justify;
+  }
+  
+  .section-header h2 {
+    font-size: 2rem;
+  }
+  
+  .theme-toggle {
+    bottom: 15px;
+    right: 15px;
+    width: 45px;
+    height: 45px;
+  }
+  
+  .info-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile Menu Toggle */
+.menu-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.menu-toggle:hover {
+  transform: rotate(90deg);
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+  
+  header nav {
+    width: 100%;
+  }
+  
+  header nav ul {
+    display: none;
+    width: 100%;
+    padding: 1rem 0;
+    background: rgba(62, 50, 50, 0.95);
+    border-radius: 8px;
+    margin-top: 1rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  header nav.active ul {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  header nav a {
+    padding: 0.8rem 1rem;
+    display: block;
+    width: 100%;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--tertiary);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary);
+}
+</style>
 </head>
 <body>
 
@@ -583,37 +1168,142 @@ body {
     </div>
   </div>
 </section>
-<section id="info-section">
-  <div class="section-header">
-    <h2>Informasi Kota Bandung</h2>
-    <p>Bandung dikenal sebagai Paris van Java dengan berbagai destinasi wisata, kuliner khas, dan budaya yang menarik.</p>
-  </div>
-<div class="info-cards">
+  <div class="info-cards">
+  <!-- Card 1 - Wisata -->
   <div class="info-card">
-    <img src="asset/kawah-putih.jpg" alt="Kawah Putih" class="info-image">
-    <h3>Wisata</h3>
-    <p>Destinasi populer di Bandung mencakup Kawah Putih, Tangkuban Perahu, Dusun Bambu, Braga, dan Floating Market. Kawasan ini menyajikan kombinasi alam, sejarah, dan hiburan modern. <br><small>Sumber: Disparbud Jabar</small></p>
+    <div class="info-image-container">
+      <div class="info-image-bg" style="background-image: url('asset/kawah-putih.jpg');"></div>
+      <img src="asset/kawah-putih.jpg" alt="Kawah Putih" class="info-image-circle">
+      <div class="info-image-overlay">
+        <div class="info-icon">
+          <i class="fas fa-heart"></i>
+        </div>
+        <div class="info-clock-info">
+          <svg class="info-clock" viewBox="0 0 24 24">
+            <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"></path>
+          </svg>
+          <span class="info-time">5 min</span>
+        </div>
+      </div>
+    </div>
+    <div class="info-content">
+      <div class="info-category">Wisata</div>
+      <h3>Destinasi Populer</h3>
+      <p>Destinasi populer di Bandung mencakup Kawah Putih, Tangkuban Perahu, Dusun Bambu, Braga, dan Floating Market. Kawasan ini menyajikan kombinasi alam, sejarah, dan hiburan modern.</p>
+      <div class="info-meta">
+        <span class="info-by">Oleh: <a href="#" class="info-author">Disparbud Jabar</a></span>
+      </div>
+    </div>
   </div>
+  
+  <!-- Card 2 - Fakta Menarik -->
   <div class="info-card">
-    <img src="asset/kota-kreatif.jpg" alt="Kota Kreatif" class="info-image">
-    <h3>Fakta Menarik</h3>
-    <p>Bandung menjadi kota pertama di Indonesia yang diakui UNESCO dalam Creative Cities Network (2015), berkat inovasi di desain dan budaya.<br><small>Sumber: UNESCO UCCN</small></p>
+    <div class="info-image-container">
+      <div class="info-image-bg" style="background-image: url('asset/kota-kreatif.jpg');"></div>
+      <img src="asset/kota-kreatif.jpg" alt="Kota Kreatif" class="info-image-circle">
+      <div class="info-image-overlay">
+        <div class="info-icon">
+          <i class="fas fa-heart"></i>
+        </div>
+        <div class="info-clock-info">
+          <svg class="info-clock" viewBox="0 0 24 24">
+            <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"></path>
+          </svg>
+          <span class="info-time">3 min</span>
+        </div>
+      </div>
+    </div>
+    <div class="info-content">
+      <div class="info-category">Prestasi</div>
+      <h3>Kota Kreatif UNESCO</h3>
+      <p>Bandung menjadi kota pertama di Indonesia yang diakui UNESCO dalam Creative Cities Network (2015), berkat inovasi di desain dan budaya.</p>
+      <div class="info-meta">
+        <span class="info-by">Oleh: <a href="#" class="info-author">UNESCO UCCN</a></span>
+      </div>
+    </div>
   </div>
+  
+  <!-- Card 3 - Kualitas Udara -->
   <div class="info-card">
-  <img src="asset/aqi-bandung.jpg" alt="Kualitas Udara Bandung" class="info-image">
-  <h3>Kualitas Udara Bandung</h3>
-  <p id="aqi-info">Memuat data AQI...</p>
+    <div class="info-image-container">
+      <div class="info-image-bg" style="background-image: url('asset/aqi-bandung.jpg');"></div>
+      <img src="asset/aqi-bandung.jpg" alt="Kualitas Udara Bandung" class="info-image-circle">
+      <div class="info-image-overlay">
+        <div class="info-icon">
+          <i class="fas fa-heart"></i>
+        </div>
+        <div class="info-clock-info">
+          <svg class="info-clock" viewBox="0 0 24 24">
+            <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"></path>
+          </svg>
+          <span class="info-time">2 min</span>
+        </div>
+      </div>
+    </div>
+    <div class="info-content">
+      <div class="info-category">Lingkungan</div>
+      <h3>Kualitas Udara</h3>
+      <p id="aqi-info">Informasi terkini mengenai kualitas udara di Kota Bandung, termasuk nilai AQI dan rekomendasi aktivitas luar ruangan.</p>
+      <div class="info-meta">
+        <span class="info-by">Oleh: <a href="#" class="info-author">World Air Quality Index</a></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 4 - Cuaca -->
+  <div class="info-card">
+    <div class="info-image-container">
+      <div class="info-image-bg" style="background-image: url('asset/cuaca-bandung.jpeg');"></div>
+      <img src="asset/cuaca-bandung.jpeg" alt="Cuaca Bandung" class="info-image-circle">
+      <div class="info-image-overlay">
+        <div class="info-icon">
+          <i class="fas fa-heart"></i>
+        </div>
+        <div class="info-clock-info">
+          <svg class="info-clock" viewBox="0 0 24 24">
+            <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"></path>
+          </svg>
+          <span class="info-time">2 min</span>
+        </div>
+      </div>
+    </div>
+    <div class="info-content">
+      <div class="info-category">Meteorologi</div>
+      <h3>Prakiraan Cuaca</h3>
+      <p id="weather-info">Informasi cuaca terkini di Kota Bandung, termasuk suhu, kelembaban, dan prakiraan untuk beberapa hari ke depan.</p>
+      <div class="info-meta">
+        <span class="info-by">Oleh: <a href="#" class="info-author"> OpenWeatherMap</a></span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Card 5 - Informasi Spasial -->
+  <div class="info-card">
+    <div class="info-image-container">
+      <div class="info-image-bg" style="background-image: url('asset/peta-bandung.png');"></div>
+      <img src="asset/peta-bandung.png" alt="Peta Bandung" class="info-image-circle">
+      <div class="info-image-overlay">
+        <div class="info-icon">
+          <i class="fas fa-heart"></i>
+        </div>
+        <div class="info-clock-info">
+          <svg class="info-clock" viewBox="0 0 24 24">
+            <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"></path>
+          </svg>
+          <span class="info-time">4 min</span>
+        </div>
+      </div>
+    </div>
+    <div class="info-content">
+      <div class="info-category">Geografi</div>
+      <h3>Data Spasial</h3>
+      <p>Koordinat: 6.9175° S, 107.6191° E | Luas: ±167 km². Bandung terletak dalam cekungan Bandung dan dikelilingi pegunungan.</p>
+      <div class="info-meta">
+        <span class="info-by">Oleh: <a href="#" class="info-author">Bappeda Kota Bandung</a></span>
+      </div>
+    </div>
+  </div>
 </div>
- <div class="info-card" id="weather-card">
-  <img src="asset/cuaca-bandung.jpeg" alt="Cuaca Bandung" class="info-image">
-  <h3>Laporan Cuaca</h3>
-  <p id="weather-info">Memuat data cuaca...</p>
-</div>
-  <div class="info-card">
-    <img src="asset/peta-bandung.png" alt="Peta Bandung" class="info-image">
-    <h3>Informasi Spasial</h3>
-    <p>Koordinat: 6.9175° S, 107.6191° E | Luas: ±167 km². Bandung terletak dalam cekungan Bandung dan dikelilingi pegunungan. <br><small>Sumber: Bappeda Kota Bandung</small></p>
-  </div>
 </section>
 
 <footer id="footer">
@@ -624,7 +1314,7 @@ body {
     </div>
 
     <div class="footer-section">
-      <h3>Kontak Kami</h3>
+      <h3>Kontak Saya</h3>
       <div class="contact-info">
         <div class="contact-item">
           <i class="fas fa-map-marker-alt"></i>
@@ -639,33 +1329,44 @@ body {
           <span>+62 856241118875</span>
         </div>
       </div>
+      
+      <div class="social-icons">
+        <a href="https://github.com/bleachedd" target="_blank"><i class="fab fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/friscka-aditama-7a87072bb" target="_blank"><i class="fab fa-linkedin"></i></a>
+        <a href="https://www.instagram.com/frisckaditama" target="_blank"><i class="fab fa-instagram"></i></a>
+      </div>
     </div>
   </div>
 
   <div class="footer-developer">
     <h3>Tentang Pengembang</h3>
-    <div class="developer-info">
-      <img src="./asset/foto-friscka.jpg" alt="Foto Friscka Fitri Aditama" class="developer-photo">
-      <div class="developer-text">
-        <p><strong>Friscka Fitri Aditama</strong></p>
-        <p>Mahasiswa Sains Informasi Geografi, Universitas Pendidikan Indonesia</p>
-        <p>NIM: 2309831 | Angkatan 2023</p>
-        <p>Website ini dibuat sebagai bagian dari tugas mata kuliah WebGIS. Menggunakan teknologi HTML, CSS, dan JavaScript dengan pendekatan desain responsif.</p>
-        <div class="social-icons">
-          <a href="https://github.com/bleachedd" target="_blank"><i class="fab fa-github"></i></a>
-          <a href="https://www.linkedin.com/in/friscka-aditama-7a87072bb" target="_blank"><i class="fab fa-linkedin"></i></a>
-          <a href="https://www.instagram.com/frisckaditama" target="_blank"><i class="fab fa-instagram"></i></a>
+    
+    <!-- Developer Card with Animation -->
+    <div class="developer-card">
+      <div class="container">
+        <div class="card">
+          <div class="slide slide1">
+            <div class="icon">
+              <img src="./asset/foto-friscka.jpg" alt="Foto Friscka Fitri Aditama" class="developer-photo">
+            </div>
+          </div>
+          <div class="slide slide2">
+            <div class="content">
+              <h3>Friscka Fitri Aditama</h3>
+              <p>Mahasiswa Sains Informasi Geografi, Universitas Pendidikan Indonesia</p>
+              <p>NIM: 2309831 | Angkatan 2023</p>
+              <p>Website ini dibuat sebagai bagian dari tugas mata kuliah WebGIS.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="copyright">
-    <p>© 2025 WebGIS Kota Bandung</p>
+    <p>© 2025 WebGIS Kota Bandung - frisckaa22@upi.edu</p>
   </div>
-</footer>
-
-<!-- JavaScript Libraries -->
+</footer><!-- JavaScript Libraries -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
@@ -674,6 +1375,57 @@ body {
 <script src="https://unpkg.com/leaflet-measure@2.1.7/dist/leaflet-measure.js"></script>
 
 <script>
+  // Theme toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+  // Create theme toggle button
+  const themeToggle = document.createElement('button');
+  themeToggle.className = 'theme-toggle';
+  themeToggle.innerHTML = '<i class="fas fa-moon"></i>'; // Using Font Awesome icon
+  document.body.appendChild(themeToggle);
+  
+  // Add transition class to key elements
+  const elementsToTransition = [
+    'body', 'header', '.info-card', '.info.legend', 
+    '.popup-content', '.section-header h2', '.section-header p',
+    '.footer-section h3', '.info-card h3', '.info-card p'
+  ];
+  
+  elementsToTransition.forEach(selector => {
+    document.querySelectorAll(selector).forEach(element => {
+      element.classList.add('theme-transition');
+    });
+  });
+  
+  // Check for saved user preference
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  if (savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+  }
+  
+  // Theme toggle click handler
+  themeToggle.addEventListener('click', function() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    let targetTheme = 'light';
+    
+    if (currentTheme !== 'dark') {
+      targetTheme = 'dark';
+      this.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+      this.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+    
+    document.documentElement.setAttribute('data-theme', targetTheme);
+    localStorage.setItem('theme', targetTheme);
+    
+    // If map exists, refresh it after theme change
+    if (typeof map !== 'undefined') {
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 300);
+    }
+  });
+});
 // Mobile Menu Toggle
 document.getElementById('menu-toggle').addEventListener('click', function() {
   document.getElementById('main-nav').classList.toggle('active');
@@ -1068,17 +1820,16 @@ const infoPanel = L.control({position: 'topleft'});
 infoPanel.onAdd = function (map) {
   const div = L.DomUtil.create('div', 'info');
   div.style.padding = '6px 8px';
-  div.style.background = 'rgba(255,255,255,0.8)';
+  div.style.background = 'rgba(40, 40, 40, 0.85)'; // Dark background
+  div.style.color = '#ffffff'; // White text
   div.style.borderRadius = '5px';
-  div.style.boxShadow = '0 0 15px rgba(0,0,0,0.2)';
-  div.innerHTML = '<h4 style="margin: 0 0 5px; color: #641B2E;">Kota Bandung</h4>' + 
-                  '<p style="margin: 0; font-size: 12px;">Hover pada area untuk melihat informasi</p>';
+  div.style.boxShadow = '0 0 15px rgba(0, 0, 0, 0.4)';
+  div.innerHTML = '<h4 style="margin: 0 0 5px; color: #ff9d9d;">Kota Bandung</h4>' + 
+                  '<p style="margin: 0; font-size: 12px; color: #cccccc;">Hover pada area untuk melihat informasi</p>';
   return div;
 };
 
 infoPanel.addTo(map);
-
-
 
 // Add scale control
 L.control.scale({
@@ -1178,7 +1929,7 @@ const bandungChart = new Chart(ctx, {
 </script>
 <script>
     const apiKey = "11ff8556f92661caf8575a96a8c7950c";
-    const aqiApiKey = "ebeed99cd6b48352766114c4ce184ad6fb952821"; // Ganti dengan token WAQI yang valid
+    const aqiApiKey = "ebeed99cd6b48352766114c4ce184ad6fb952821";
     const lat = -6.9147;
     const lon = 107.6098;
 
@@ -1205,7 +1956,6 @@ const bandungChart = new Chart(ctx, {
           💧 Kelembapan: ${kelembapan}%<br>
           💨 Angin: ${angin} m/s<br>
           ⏰ Update: ${waktu} WIB<br>
-          <small>Sumber: OpenWeatherMap</small>
         `;
         document.getElementById("weather-info").innerHTML = weatherHTML;
       })
@@ -1234,7 +1984,6 @@ const bandungChart = new Chart(ctx, {
             <strong>Indeks Kualitas Udara: ${aqi}</strong><br>
             🧪 Polutan Dominan: ${dominan.toUpperCase()}<br>
             ⏰ Update: ${waktu} WIB<br>
-            <small>Sumber: World Air Quality Index</small>
           `;
           document.getElementById("aqi-info").innerHTML = aqiHTML;
         } else {
