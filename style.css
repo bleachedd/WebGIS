@@ -1,122 +1,57 @@
-/* General Reset */
-body, html {
+:root {
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --accent-color: #007BFF;
+}
+
+body.dark-mode {
+  --bg-color: #121212;
+  --text-color: #ffffff;
+  --accent-color: #1E90FF;
+}
+
+body {
   margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', sans-serif;
-  scroll-behavior: smooth;
+  font-family: Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
 }
 
-/* Navbar */
-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #009688;
-  padding: 10px 20px;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-nav img {
-  height: 40px;
-}
-
-nav ul {
-  list-style: none;
-  display: flex;
-  gap: 20px;
-  margin: 0;
-  padding: 0;
-}
-
-nav ul li a {
-  color: white;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-nav ul li a:hover {
-  text-decoration: underline;
-}
-
-/* Hero Section */
-.hero {
-  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
-              url('asset/bg.jpg') no-repeat center center/cover;
-  color: white;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+header, footer {
+  background-color: var(--accent-color);
+  color: #fff;
+  padding: 1em;
   text-align: center;
 }
 
-.hero h1 {
-  font-size: 3em;
-  margin-bottom: 0.3em;
-}
-
-.hero p {
+#theme-toggle {
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  background: none;
+  border: none;
   font-size: 1.5em;
-  font-weight: 300;
+  cursor: pointer;
 }
 
-/* Section General */
-section {
-  padding: 60px 20px;
-  text-align: center;
+main {
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 160px);
 }
 
-/* Map Container */
 #map {
-  height: 600px;
-  margin: 0 auto;
-  border: 2px solid #ccc;
-  border-radius: 8px;
+  flex: 2;
+  height: 100%;
 }
 
-/* Footer */
-.footer {
-  background: #333;
-  color: white;
-  text-align: center;
-  padding: 15px 0;
+#info-panel {
+  flex: 1;
+  padding: 1em;
+  overflow-y: auto;
+  background-color: var(--bg-color);
 }
 
-/* Legend Box for Leaflet */
-.legend {
-  padding: 6px 8px;
-  background-color: rgba(255,255,255,0.8);
-  box-shadow: 0 0 15px rgba(0,0,0,0.2);
-  border-radius: 5px;
+#prediction {
+  margin-top: 2em;
 }
-
-.legend div {
-  width: 30px;
-  height: 15px;
-  float: left;
-  margin-right: 8px;
-  opacity: 0.7;
-}
-
-div.legend.leaflet-control br {
-  clear: both;
-}
-
-/* Responsive Design */
-@media screen and (max-width: 768px) {
-  nav ul {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .hero h1 {
-    font-size: 2em;
-  }
-
-  .hero p {
-    font-size: 1em;
-  }
-}
-

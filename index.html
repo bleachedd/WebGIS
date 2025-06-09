@@ -1,1250 +1,1546 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WebGIS Kota Bandung</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bandung WeatherGuard - WebGIS Pemantauan Cuaca, Udara & Risiko Banjir</title>
 
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css" />
-  <link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen/Control.fullscreen.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
 
-  <style>
-    :root {
-      --primary: #641B2E;
-      --secondary: #8A2D3B;
-      --tertiary: #BE5B50;
-      --accent: #FBDB93;
-      --dark: #333;
-      --light: #f9f9f9;
-    }
-    
-    body, html { 
-      margin: 0; 
-      padding: 0; 
-      font-family: 'Poppins', sans-serif; 
-      scroll-behavior: smooth;
-      color: var(--dark);
-      background-color: var(--light);
-    }
+    <style>
+        /* Font Family */
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, h5, h6, .font-serif {
+            font-family: 'Libre Baskerville', serif;
+        }
+        
+        /* New Hero Section Styles */
+        .hero-section {
+            background-image: 
+                linear-gradient(rgba(0, 31, 82, 0.85), rgba(161, 0, 84, 0.7)),
+                url('https://images.unsplash.com/photo-1561484930-974554019ade?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-position: center;
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding-top: 5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .hero-content {
+            max-width: 7xl;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+        
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+        
+        @media (min-width: 1024px) {
+            .hero-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .hero-text {
+            background: rgba(255, 236, 186, 0.95);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(161, 0, 84, 0.15);
+            border: 1px solid rgba(255, 141, 104, 0.3);
+        }
+        
+        .hero-title {
+            font-weight: 700;
+            color: #001F52;
+            font-size: 2.5rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .hero-title {
+                font-size: 3.5rem;
+            }
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #5E6B8C;
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        @media (min-width: 640px) {
+            .hero-buttons {
+                flex-direction: row;
+            }
+        }
+        
+        .btn-primary {
+            background: #FF8D68;
+            color: #001F52;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .btn-primary:hover {
+            background: #A10054;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(161, 0, 84, 0.2);
+            color: #FFECBA;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #001F52;
+            font-weight: 500;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            border: 2px solid #FF8D68;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 141, 104, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .hero-card {
+            background: #FFECBA;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(161, 0, 84, 0.15);
+            animation: float 6s ease-in-out infinite;
+            position: relative;
+            border: 1px solid rgba(255, 141, 104, 0.3);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .hero-card-image {
+            height: 250px;
+            background-position: center;
+            background-size: cover;
+        }
+        
+        .hero-card-content {
+            padding: 1.5rem;
+        }
+        
+        .card-title {
+            font-weight: 700;
+            color: #001F52;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-subtitle {
+            color: #5E6B8C;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        
+        .card-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-weight: 700;
+            color: #001F52;
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            color: #5E6B8C;
+            font-size: 0.875rem;
+        }
+        
+        .card-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #A10054;
+            color: #FFECBA;
+            padding: 0.25rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .card-button {
+            background: #001F52;
+            color: #FFECBA;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            text-align: center;
+            display: block;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .card-button:hover {
+            background: #FF8D68;
+            transform: translateY(-2px);
+            color: #001F52;
+        }
 
-  /* Header Styles */
-header {
-  background-color: var(--primary); 
-  color: white; 
-  padding: 0.8rem 2rem;
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center;
-  position: fixed; /* Mengubah dari sticky menjadi fixed untuk memastikan posisi tetap */
-  top: 0; 
-  left: 0;
-  right: 0;
-  z-index: 9999; /* Meningkatkan z-index untuk memastikan berada di atas semua elemen */
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-}
+        /* Existing styles remain below */
+        .gradient-bg { background: linear-gradient(135deg, #FF8D68 0%, #A10054 100%); }
+        
+        .glass { 
+            backdrop-filter: blur(10px); 
+            background: rgba(255, 236, 186, 0.2);
+        }
+        .dark .glass {
+            background: rgba(0, 31, 82, 0.15);
+        }
 
-header .logo { 
-  display: flex; 
-  align-items: center; 
-  gap: 1rem; 
-}
+        .data-loading::after {
+            content: '...';
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
 
-header .logo img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--accent);
-}
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
 
-header .logo h2 {
-  font-weight: 600;
-  margin: 0;
-  color: var(--accent);
-}
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-header nav ul { 
-  list-style: none; 
-  display: flex; 
-  gap: 1.5rem; 
-  margin: 0; 
-  padding: 0; 
-}
+        .fade-in-up { animation: fadeInUp 0.8s ease-out; }
 
-header nav a { 
-  color: white; 
-  text-decoration: none; 
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
+        /* AQI colors - Updated for better readability */
+        .aqi-excellent { background: linear-gradient(135deg, #E8F5E8, #C8E6C9); color: #2E7D32; }
+        .aqi-good { background: linear-gradient(135deg, #F3E5F5, #E1BEE7); color: #6A1B9A; }
+        .aqi-moderate { background: linear-gradient(135deg, #FFF3E0, #FFE0B2); color: #E65100; }
+        .aqi-poor { background: linear-gradient(135deg, #FFEBEE, #FFCDD2); color: #C62828; }
+        .aqi-very-poor { background: linear-gradient(135deg, #FCE4EC, #F8BBD9); color: #AD1457; }
+        .aqi-hazardous { background: linear-gradient(135deg, #EFEBE9, #D7CCC8); color: #3E2723; }
+        .aqi-nodata-card3 { background: #5E6B8C; color: white; }
 
-header nav a:hover {
-  background-color: var(--accent);
-  color: var(--primary);
-}
+        /* Flood risk colors (for dashboard status) */
+        .status-low-risk { background-color: rgba(200, 230, 201, 0.4); color: #2ee02e; }
+        .status-medium-risk { background-color: rgba(255, 224, 178, 0.4); color: #E65100; }
+        .status-high-risk { background-color: rgba(255, 205, 210, 0.4); color: #C62828; }
 
-/* Menambahkan padding-top pada body/main content untuk kompensasi header fixed */
-body {
-  padding-top: 80px; /* Sesuaikan dengan tinggi header Anda */
-}
+        /* Map controls */
+        .leaflet-control-container { z-index: 9998 !important; }
+        .leaflet-pane.leaflet-popup-pane { z-index: 9997 !important; }
 
-    /* Hero Section */
-  
-.hero-section {
-  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-              url('asset/alun alun bandung1.jpg') center/cover no-repeat;
-  color: white;
-  text-align: center;
-  padding: 8rem 2rem;
-  position: relative;
-}
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-track { background: #0A1429; }
+        ::-webkit-scrollbar-thumb { background: #FF8D68; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #A10054; }
 
+        /* Map popups */
+        #map .leaflet-popup-content-wrapper {
+            background-color: #FFECBA; color: #001F52;
+            border-radius: 8px; box-shadow: 0 3px 14px rgba(0, 31, 82, 0.25);
+        }
+        .dark #map .leaflet-popup-content-wrapper { background-color: #0A1429; color: #FF8D68; }
+        #map .leaflet-popup-tip { background-color: #FFECBA; }
+        .dark #map .leaflet-popup-tip { background-color: #0A1429; }
 
-.hero-content {
-  max-width: 800px;
-  margin: 0 auto;
-  z-index: 2;
-}
+        /* Map buttons */
+        .map-button {
+            background-color: #FF8D68; color: #001F52;
+            padding: 0.75rem 1.5rem; border-radius: 0.5rem;
+            transition: background-color 0.3s, color 0.3s; display: flex;
+            align-items: center; gap: 0.5rem; font-weight: 500;
+            border: 2px solid transparent;
+        }
+        .map-button:hover { background-color: #A10054; color: #FFECBA; }
+        .map-button.active { background-color: #001F52; color: #FFECBA; border-color: #FF8D68; }
+        .dark .map-button { background-color: #A10054; color: #FFECBA; }
+        .dark .map-button:hover { background-color: #001F52; color: #FF8D68; }
+        .dark .map-button.active { background-color: #FF8D68; color: #001F52; border-color: #A10054; }
 
-.hero-section h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  color: var(--accent);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-}
+        /* Custom map icons */
+        .custom-location-icon {
+            background-color: #FF8D68; border: 2px solid #A10054; border-radius: 50%;
+            width: 30px; height: 30px; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 31, 82, 0.3);
+            transition: transform 0.2s ease-out, background-color 0.3s, border-color 0.3s;
+        }
+        .custom-location-icon i { color: #001F52; font-size: 16px; transition: color 0.3s; }
+        .custom-location-icon:hover { transform: scale(1.1); }
+        .dark .custom-location-icon { background-color: #A10054; border-color: #FF8D68; }
+        .dark .custom-location-icon i { color: #FF8D68; }
+       
+        /* Dashboard layout */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.5rem; }
+        .dashboard-header { grid-column: span 12; }
+        .weather-overview { grid-column: span 12; }
+        @media (min-width: 768px) { .weather-overview { grid-column: span 12; } }
+        @media (min-width: 1024px) { .weather-overview { grid-column: span 12; } }
 
-.hero-section p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  line-height: 1.6;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
-}
+        /* Info Card styles (Main Dashboard) */
+        .info-card {
+            background: rgba(255, 236, 186, 0.2); border-radius: 1rem; padding: 1.5rem;
+            transition: all 0.3s ease; height: 100%; color: #001F52;
+            border: 1px solid rgba(255, 141, 104, 0.2);
+        }
+        .dark .info-card {
+            background: rgba(0, 31, 82, 0.15); color: #FFECBA;
+            border-color: rgba(161, 0, 84, 0.3);
+        }
+        .info-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 20px rgba(0, 31, 82, 0.15);
+            border-color: #A10054;
+        }
+        .dark .info-card:hover {
+            box-shadow: 0 10px 20px rgba(255, 141, 104, 0.1);
+            border-color: #FF8D68;
+        }
+        .info-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; }
+        .info-card .value { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .info-card .label { font-size: 0.9rem; opacity: 0.8; }
+        .weather-icon-lg { font-size: 3rem; margin-bottom: 1rem; color: #A10054; }
+        .dark .weather-icon-lg { color: #FF8D68; }
+        .status-indicator {
+            display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px;
+            font-size: 0.8rem; font-weight: 500;
+        }
 
- .cta-button {
-  display: inline-block;
-  background-color: var(--primary);
-  color: var(--accent);
-  padding: 0.75rem 1.5rem;
-  border-radius: 50px;
-  font-size: 1rem;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px var(--dark);
-}
+        /* Layer Control & Legend Styles */
+        .layer-control-container, .legend-container {
+            position: absolute; z-index: 1000; 
+            background: rgba(255, 236, 186, 0.95);
+            border-radius: 8px; padding: 12px 15px; 
+            box-shadow: 0 2px 10px rgba(0, 31, 82, 0.2); 
+            max-width: 280px;
+            border: 1px solid rgba(255, 141, 104, 0.2);
+        }
+        .dark .layer-control-container, .dark .legend-container { 
+            background: rgba(10, 20, 41, 0.95); 
+            border-color: rgba(161, 0, 84, 0.3);
+        }
+        .layer-control-container { top: 90px; right: 10px; }
+        .legend-container { bottom: 40px; left: 10px; }
+        .control-title, .legend-title {
+            font-weight: 600; margin-bottom: 10px; color: #001F52; font-size: 1.05em;
+            border-bottom: 1px solid #5E6B8C; padding-bottom: 5px;
+        }
+        .dark .control-title, .dark .legend-title { color: #FF8D68; border-bottom-color: #A10054; }
+        .layer-control-item, .legend-item { display: flex; align-items: center; margin-bottom: 8px; }
+        .layer-control-item input[type="checkbox"] { margin-right: 10px; accent-color: #FF8D68; transform: scale(1.1); }
+        .dark .layer-control-item input[type="checkbox"] { accent-color: #A10054; }
+        .layer-control-item label, .legend-label { color: #001F52; font-size: 14px; flex-grow: 1; }
+        .dark .layer-control-item label, .dark .legend-label { color: #FF8D68; }
+        .legend-color { 
+            width: 20px; height: 20px; margin-right: 8px; border-radius: 3px; 
+            border: 1px solid rgba(0, 31, 82, 0.3); 
+        }
+        .dark .legend-color { border: 1px solid rgba(255, 141, 104, 0.3); }
+        
+        /* Compact Weather Card Styles */
+        .compact-weather-card {
+            background: #FFECBA;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 31, 82, 0.1);
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            cursor: pointer;
+            border: 2px solid #5E6B8C;
+        }
+        
+        .dark .compact-weather-card {
+            background: rgba(10, 20, 41, 0.8);
+            border-color: #A10054;
+            color: #FF8D68;
+        }
+        
+        .compact-weather-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 31, 82, 0.15);
+            border-color: #FF8D68;
+        }
+        
+        .compact-weather-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .location-name {
+            font-weight: 700;
+            color: #001F52;
+            font-size: 1.1rem;
+        }
+        
+        .dark .location-name {
+            color: #FF8D68;
+        }
+        
+        .weather-icon {
+            font-size: 1.5rem;
+            color: #A10054;
+        }
+        
+        .dark .weather-icon {
+            color: #FF8D68;
+        }
+        
+        .compact-weather-card-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+        
+        .weather-data-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(94, 107, 140, 0.1);
+            border-radius: 0.5rem;
+        }
+        
+        .dark .weather-data-item {
+            background: rgba(255, 141, 104, 0.1);
+        }
+        
+        .data-label {
+            font-size: 0.8rem;
+            color: #5E6B8C;
+        }
+        
+        .dark .data-label {
+            color: #FF8D68;
+        }
+        
+        .data-value {
+            font-weight: 700;
+            color: #001F52;
+            font-size: 1.1rem;
+        }
+        
+        .dark .data-value {
+            color: #FF8D68;
+        }
+        
+        .flood-risk {
+            margin-top: 0.75rem;
+            text-align: center;
+            padding: 0.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        /* Dark Mode Toggle Styles */
+        .theme-toggle {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            cursor: pointer;
+        }
+        
+        .theme-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .theme-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #FF8D68;
+            border-radius: 34px;
+            transition: .4s;
+        }
+        
+        .theme-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .4s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+        }
+        
+        .theme-toggle input:checked + .theme-slider {
+            background-color: #001F52;
+        }
+        
+        .theme-toggle input:checked + .theme-slider:before {
+            transform: translateX(26px);
+        }
+        
+        .light-icon, .dark-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #5E6B8C;
+            transition: opacity 0.3s;
+        }
+        
+        .light-icon {
+            left: 8px;
+        }
+        
+        .dark-icon {
+            right: 8px;
+        }
+        
+        .theme-toggle input:checked ~ .light-icon {
+            opacity: 0;
+        }
+        
+        .theme-toggle input:not(:checked) ~ .dark-icon {
+            opacity: 0;
+        }
+        
+        /* Header scroll effect */
+        .scrolled-header {
+            background: linear-gradient(135deg, #FF8D68 0%, #A10054 100%);
+            box-shadow: 0 4px 20px rgba(0, 31, 82, 0.15);
+            padding: 0.5rem 0;
+        }
+        
+        /* Dark mode specific styles */
+        .dark {
+            background-color: #001F52;
+            color: #FFECBA;
+        }
+        
+        .dark .scrolled-header {
+            background: linear-gradient(135deg, #001F52 0%, #A10054 100%);
+        }
+        
+        /* Dark mode hero section */
+        .dark .hero-section {
+            background-image: 
+                linear-gradient(rgba(0, 31, 82, 0.85), rgba(161, 0, 84, 0.7)),
+                url('https://images.unsplash.com/photo-1561484930-974554019ade?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+        }
+        
+        .dark .hero-text {
+            background: rgba(10, 20, 41, 0.95);
+            color: #FFECBA;
+            border-color: rgba(161, 0, 84, 0.3);
+        }
+        
+        .dark .hero-title {
+            color: #FFECBA;
+        }
+        
+        .dark .hero-subtitle {
+            color: #FF8D68;
+        }
+        
+        .dark .btn-primary {
+            background: #A10054;
+            color: #FFECBA;
+        }
+        
+        .dark .btn-primary:hover {
+            background: #001F52;
+        }
+        
+        .dark .btn-secondary {
+            color: #FFECBA;
+            border-color: #A10054;
+        }
+        
+        .dark .btn-secondary:hover {
+            background: rgba(161, 0, 84, 0.1);
+        }
+        
+        .dark .hero-card {
+            background: rgba(10, 20, 41, 0.9);
+            border-color: rgba(161, 0, 84, 0.3);
+        }
+        
+        .dark .card-title {
+            color: #FFECBA;
+        }
+        
+        .dark .card-subtitle {
+            color: #FF8D68;
+        }
+        
+        .dark .stat-value {
+            color: #FFECBA;
+        }
+        
+        .dark .stat-label {
+            color: #FF8D68;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero-section {
+                min-height: auto;
+                padding-top: 4rem;
+                padding-bottom: 4rem;
+            }
+            
+            .hero-grid {
+                gap: 2rem;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .map-buttons-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .map-button {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+        
+        /* Map buttons container */
+        .map-buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+    </style>
 
-.cta-button:hover {
-  background-color: var(--primary);
-  color: var(--bg);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px --light;
-}
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF8D68',
+                        secondary: '#A10054',
+                        accent1: '#5E6B8C',
+                        accent2: '#001F52',
+                        light: '#FFECBA',
+                        coral: {
+                            50: '#fef7f6',
+                            100: '#fdeeed',
+                            200: '#f9ddd9',
+                            300: '#f5cbc5',
+                            400: '#FF8D68',
+                            500: '#ff7f59',
+                            600: '#ff714b',
+                            700: '#ff623c',
+                            800: '#ff542e',
+                            900: '#ff451f'
+                        },
+                        magenta: {
+                            50: '#fdf5f9',
+                            100: '#fcebf3',
+                            200: '#f9d7e7',
+                            300: '#f7c3db',
+                            400: '#f29fbf',
+                            500: '#A10054',
+                            600: '#91004c',
+                            700: '#810044',
+                            800: '#71003c',
+                            900: '#610034'
+                        },
+                        gray: {
+                            50: '#f8f9fa',
+                            100: '#f1f3f4',
+                            200: '#e8eaed',
+                            300: '#dadce0',
+                            400: '#bdc1c6',
+                            500: '#5E6B8C',
+                            600: '#4f5a78',
+                            700: '#404964',
+                            800: '#313850',
+                            900: '#22273c'
+                        },
+                        blue: {
+                            50: '#e6f0ff',
+                            100: '#cce0ff',
+                            200: '#99c1ff',
+                            300: '#66a3ff',
+                            400: '#3384ff',
+                            500: '#001F52',
+                            600: '#001b49',
+                            700: '#001740',
+                            800: '#001337',
+                            900: '#000f2e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
-/* Animation */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+<body class="bg-accent2 dark:bg-primary text-primary dark:text-white transition-colors duration-300">
+    <header class="fixed top-0 left-0 right-0 z-[9999] gradient-bg text-white shadow-xl transition-all duration-300" id="main-header">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4 fade-in-up">
+                    <div class="w-12 h-12 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <img src=asset/Lambang_Kabupaten_Bandung.png
+                             alt="Logo Kabupaten Bandung" 
+                             class="w-10 h-10 object-contain" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/48x48/EF9595/B0DAFF?text=Logo';">
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Skya</h1>
+                        <p class="text-sm opacity-90"> Real-Time Climate Awareness for Kabupaten Bandung</p>
+                    </div>
+                </div>
 
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#dashboard" class="hover:text-accent2 transition-colors font-medium">Dashboard</a>
+                    <a href="#map-section" class="hover:text-accent2 transition-colors font-medium">Peta</a>
+                    <a href="#about-section" class="hover:text-accent2 transition-colors font-medium">Tentang</a>
+                </nav>
 
-    /* Map Section */
-    #map-section { 
-      padding: 4rem 2rem; 
-      background: var(--light);
-    }
-    
-    .section-header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    
-    .section-header h2 {
-      color: var(--primary);
-      font-size: 2.2rem;
-      margin-bottom: 1rem;
-      position: relative;
-      display: inline-block;
-    }
-    
-    .section-header h2::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      width: 60%;
-      height: 4px;
-      background-color: var(--tertiary);
-      transform: translateX(-50%);
-      border-radius: 2px;
-    }
-    
-    .section-header p {
-      color: var(--secondary);
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    
-    .map-container {
-      position: relative;
-      margin-top: 2rem;
-    }
-    
-    #map { 
-      height: 450px; 
-      width: 100%; 
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-    }
-    
-    .map-tools {
-      display: flex;
-      justify-content: center;
-      margin-top: 1.5rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    
-    .tool-button {
-      padding: 0.6rem 1.2rem;
-      background-color: var(--tertiary);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.2s ease;
-    }
-    
-    .tool-button:hover {
-      background-color: var(--secondary);
-    }
-    
-    .tool-button i {
-      font-size: 1rem;
-    }
-    
-    /* Information Cards */
-.info-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.8rem;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-}
-
-.info-card {
-  background: var(--accent);
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(138, 45, 59, 0.8);
-  transition: transform 0.3s;
-}
-
-.info-card:hover {
-  transform: translateY(-5px);
-}
-
-.info-card h3 {
-  color: var(--primary);
-  margin-bottom: 1rem;
-}
-
-.info-card p {
-  font-size: 0.95rem;
-  color: var(--dark);
-}
-    /* Footer */
-    footer {
-      background: var(--primary); 
-      color: var(--light); 
-      padding: 2rem;
-    }
-    
-    .footer-content {
-  display: flex;
-  justify-content: center; /* <--- ini yang menggeser ke tengah */
-  gap: 60px; /* jarak antar kolom */
-  flex-wrap: wrap;
-  text-align: left;
-}
- .footer-section {
-  max-width: 300px;
-}
-
-    .footer-section h3 {
-      color: var(--accent);
-      margin-bottom: 1rem;
-      position: relative;
-    }
-
-    .footer-section h3::after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 0;
-      width: 50px;
-      height: 2px;
-      background-color: var(--accent);
-    }
-    .footer-developer {
-  text-align: center; /* Menjadikan teks di dalam div footer-developer menjadi rata tengah */
-  padding: 20px;
-}
-
-.footer-developer h3 {
-  font-size: 1.5rem;
-  margin-bottom: 15px;
-}
-
-.developer-info {
-  display: inline-block; /* Menggunakan inline-block agar konten di dalamnya dapat tersusun dengan baik */
-  text-align: center;
-}
-
-.developer-photo {
-  width: 120px; /* Sesuaikan ukuran gambar */
-  height: 120px;
-  border-radius: 50%;
-  margin-bottom: 10px;
-}
-
-
-    
-    .contact-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-    
-    .contact-item {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-    }
-    
-    .social-icons {
-      display: flex;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    
-    .social-icons a {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      background-color: rgba(255,255,255,0.1);
-      border-radius: 50%;
-      color: white;
-      transition: all 0.3s ease;
-    }
-    
-    .social-icons a:hover {
-      background-color: var(--accent);
-      color: var(--primary);
-      transform: translateY(-3px);
-    }
-    
-
-/* Information Cards */
-.info-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
-}
-.info-image {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-}
-
-
-.info-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  transition: transform 0.3s;
-}
-
-.info-card:hover {
-  transform: translateY(-5px);
-}
-
-.info-card h3 {
-  color: var(--primary);
-  margin-bottom: 1rem;
-}
-
-.info-card p {
-  font-size: 0.95rem;
-  color: var(--dark);
-}
-.info-card p {
-    text-align: justify;
-}
-.info-icon {
-  text-align: center;
-  margin: 0.5rem 0;
-  color: var(--primary); /* atau sesuaikan dengan tema warna */
-}
-
-.info.legend {
-    background: white;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    line-height: 1.3;
-    color: var(--dark);
-    max-width: 200px;
-    font-size: 12px;
-
-    position: absolute;
-    top: 50%;
-    left: 4px;
-    transform: translateY(-110%);
-}
-
-.info.legend h4 {
-    margin: 4px 0 4px;
-    color: var(--primary);
-    text-align: center;
-    font-size: 13px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 2px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 2px;
-    margin-top: 2px;
-    font-size: 11px;
-}
-
-.legend-color {
-    width: 14px;
-    height: 14px;
-    margin-right: 6px;
-    border-radius: 2px;
-    border: 1px solid rgba(0,0,0,0.2);
-}
-
-
-    /* Popup Styles */
-    .leaflet-popup-content-wrapper {
-      border-radius: 8px;
-      padding: 0;
-      overflow: hidden;
-    }
-    
-    .custom-popup {
-      padding: 0;
-    }
-    
-    .popup-header {
-      background-color: var(--primary);
-      color: white;
-      padding: 10px 15px;
-      font-weight: 600;
-    }
-    
-    .popup-content {
-      padding: 15px;
-    }
-    
-    .popup-content p {
-      margin: 5px 0;
-    }
-
-    /* Responsive Styles */
-    @media (max-width: 768px) {
-      header {
-        flex-direction: column;
-        padding: 1rem;
-      }
-      
-      header .logo {
-        margin-bottom: 1rem;
-      }
-      
-      header nav ul {
-        flex-direction: column;
-        text-align: center;
-        gap: 0.5rem;
-      }
-      
-      .hero-section h1 {
-        font-size: 2rem;
-      }
-      
-      .hero-section p {
-        font-size: 1rem;
-      }
-      
-      #map {
-        height: 300px;
-      }
-      
-      .footer-content {
-        flex-direction: column;
-      }
-    }
-    
-    /* Mobile Menu Toggle */
-    .menu-toggle {
-      display: none;
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-    
-    @media (max-width: 768px) {
-      .menu-toggle {
-        display: block;
-      }
-      
-      header nav {
-        width: 100%;
-      }
-      
-      header nav ul {
-        display: none;
-        width: 100%;
-      }
-      
-      header nav.active ul {
-        display: flex;
-      }
-    }
-    
-  </style>
-</head>
-<body>
-
-<header>
-  <div class="logo">
-    <img src="asset/logo.png" alt="Logo WebGIS Bandung" />
-    <h2>WebGIS Kota Bandung</h2>
-  </div>
-  <button class="menu-toggle" id="menu-toggle">
-    <i class="fas fa-bars"></i>
-  </button>
-  <nav id="main-nav">
-    <ul>
-      <li><a href="#hero-section"><i class="fas fa-home"></i> Home</a></li>
-      <li><a href="#map-section"><i class="fas fa-map"></i> Peta</a></li>
-      <li><a href="#info-section"><i class="fas fa-info-circle"></i></i> Informasi</a></li>
-      <li><a href="#footer"><i class="fas fa-envelope"></i> Kontak</a></li>
-    </ul>
-  </nav>
-</header>
-
-<section id="hero-section" class="hero-section">
-  <div class="hero-content">
-    <h1>Eksplorasi Spasial Kota Bandung</h1>
-    <p>Jelajahi data dan informasi geografis Kota Bandung secara interaktif melalui platform WebGIS ini. Temukan tutupan lahan, batas administrasi, dan informasi spasial lainnya.</p>
-    <a href="#map-section" class="cta-button"><i class="fas fa-map-marker-alt"></i> Mulai Eksplorasi</a>
-  </div>
-</section>
-
-<section id="map-section">
-  <div class="section-header">
-    <h2>Peta Interaktif Kota Bandung</h2>
-    <p>Visualisasi data spasial Kota Bandung dengan berbagai lapisan informasi geografis</p>
-  </div>
-  <div class="map-container">
-    <div id="map"></div>
-    <div class="map-tools">
-      <button class="tool-button" id="reset-view"><i class="fas fa-home"></i> Reset View</button>
-      <button class="tool-button" id="toggle-legend"><i class="fas fa-list"></i> Legend</button>
-      <button class="tool-button" id="measure-tool"><i class="fas fa-ruler"></i> Ukur Jarak</button>
-    </div>
-  </div>
-</section>
-<section id="info-section">
-  <div class="section-header">
-    <h2>Informasi Kota Bandung</h2>
-    <p>Bandung dikenal sebagai Paris van Java dengan berbagai destinasi wisata, kuliner khas, dan budaya yang menarik.</p>
-  </div>
-<div class="info-cards">
-  <div class="info-card">
-    <img src="asset/kawah-putih.jpg" alt="Kawah Putih" class="info-image">
-    <h3>Wisata</h3>
-    <p>Destinasi populer di Bandung mencakup Kawah Putih, Tangkuban Perahu, Dusun Bambu, Braga, dan Floating Market. Kawasan ini menyajikan kombinasi alam, sejarah, dan hiburan modern. <br><small>Sumber: Disparbud Jabar</small></p>
-  </div>
-  <div class="info-card">
-    <img src="asset/kota-kreatif.jpg" alt="Kota Kreatif" class="info-image">
-    <h3>Fakta Menarik</h3>
-    <p>Bandung menjadi kota pertama di Indonesia yang diakui UNESCO dalam Creative Cities Network (2015), berkat inovasi di desain dan budaya.<br><small>Sumber: UNESCO UCCN</small></p>
-  </div>
-  <div class="info-card">
-  <img src="asset/aqi-bandung.jpg" alt="Kualitas Udara Bandung" class="info-image">
-  <h3>Kualitas Udara Bandung</h3>
-  <p id="aqi-info">Memuat data AQI...</p>
-</div>
- <div class="info-card" id="weather-card">
-  <img src="asset/cuaca-bandung.jpeg" alt="Cuaca Bandung" class="info-image">
-  <h3>Laporan Cuaca</h3>
-  <p id="weather-info">Memuat data cuaca...</p>
-</div>
-  <div class="info-card">
-    <img src="asset/peta-bandung.png" alt="Peta Bandung" class="info-image">
-    <h3>Informasi Spasial</h3>
-    <p>Koordinat: 6.9175° S, 107.6191° E | Luas: ±167 km². Bandung terletak dalam cekungan Bandung dan dikelilingi pegunungan. <br><small>Sumber: Bappeda Kota Bandung</small></p>
-  </div>
-</section>
-
-<footer id="footer">
-  <div class="footer-content">
-    <div class="footer-section">
-      <h3>Tentang WebGIS Kota Bandung</h3>
-      <p>Platform pemetaan interaktif untuk memvisualisasikan dan menganalisis data spasial Kota Bandung. Dikembangkan sebagai alat untuk perencanaan kota dan edukasi.</p>
-    </div>
-
-    <div class="footer-section">
-      <h3>Kontak Kami</h3>
-      <div class="contact-info">
-        <div class="contact-item">
-          <i class="fas fa-map-marker-alt"></i>
-          <span>Jl. Rancamulya No.15, Bandung</span>
+                <!-- Dark/Light Mode Toggle with Sun/Moon Icons -->
+                <label class="theme-toggle">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="theme-slider"></span>
+                    <span class="light-icon"><i class="fas fa-sun"></i></span>
+                    <span class="dark-icon"><i class="fas fa-moon"></i></span>
+                </label>
+            </div>
         </div>
-        <div class="contact-item">
-          <i class="fas fa-envelope"></i>
-          <span>frisckaa22@upi.edu</span>
-        </div>
-        <div class="contact-item">
-          <i class="fas fa-phone"></i>
-          <span>+62 856241118875</span>
-        </div>
-      </div>
-    </div>
-  </div>
+    </header>
 
-  <div class="footer-developer">
-    <h3>Tentang Pengembang</h3>
-    <div class="developer-info">
-      <img src="./asset/foto-friscka.jpg" alt="Foto Friscka Fitri Aditama" class="developer-photo">
-      <div class="developer-text">
-        <p><strong>Friscka Fitri Aditama</strong></p>
-        <p>Mahasiswa Sains Informasi Geografi, Universitas Pendidikan Indonesia</p>
-        <p>NIM: 2309831 | Angkatan 2023</p>
-        <p>Website ini dibuat sebagai bagian dari tugas mata kuliah WebGIS. Menggunakan teknologi HTML, CSS, dan JavaScript dengan pendekatan desain responsif.</p>
-        <div class="social-icons">
-          <a href="https://github.com/bleachedd" target="_blank"><i class="fab fa-github"></i></a>
-          <a href="https://www.linkedin.com/in/friscka-aditama-7a87072bb" target="_blank"><i class="fab fa-linkedin"></i></a>
-          <a href="https://www.instagram.com/frisckaditama" target="_blank"><i class="fab fa-instagram"></i></a>
+    <!-- New Hero Section -->
+    <section class="hero-section" id="hero">
+        <div class="hero-content">
+            <div class="hero-grid">
+                <!-- Text content -->
+                <div class="hero-text fade-in-up" style="animation-delay: 0.1s">
+                    <h1 class="hero-title">
+                        <span class="block">Skya</span>
+                        <span class="block font-normal"> Real-Time Climate Awareness for Kabupaten Bandung</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Sistem WebGIS Kabupaten Bandung untuk memantau kondisi cuaca, kualitas udara, dan potensi banjir secara langsung.
+                        Pantau lingkungan Anda dan ambil keputusan tepat untuk keselamatan bersama.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#map-section" class="btn-primary">
+                            <i class="fas fa-map mr-2"></i> Lihat Peta
+                        </a>
+                        <a href="#dashboard" class="btn-secondary">
+                            <i class="fas fa-chart-line mr-2"></i> Dashboard
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Summary card -->
+                <div class="hero-card fade-in-up" style="animation-delay: 0.3s">
+                    <div class="hero-card-image" style="background-image: url('https://images.unsplash.com/photo-1592210454359-9043f067919b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')"></div>
+                    <div class="card-badge">Kondisi Terkini</div>
+                    <div class="hero-card-content">
+                        <h3 class="card-title">Kabupaten Bandung</h3>
+                        <p class="card-subtitle">Update Terakhir: <span id="hero-last-update">--</span></p>
+                        
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" id="hero-temp">--°C</div>
+                                <div class="stat-label">Suhu</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="hero-aqi">--</div>
+                                <div class="stat-label">AQI</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="hero-flood">--</div>
+                                <div class="stat-label">Risiko Banjir</div>
+                            </div>
+                        </div>
+                        
+                        <a href="#dashboard" class="card-button">
+                            <i class="fas fa-info-circle mr-2"></i> Detail Lengkap
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </div>
+    </section>
 
-  <div class="copyright">
-    <p>© 2025 WebGIS Kota Bandung</p>
-  </div>
+    <section id="dashboard" class="pt-16 pb-12 gradient-bg text-white">
+        <div class="container mx-auto px-4">
+            <div class="dashboard-grid">
+                <div class="dashboard-header text-center mb-8 fade-in-up">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-4">Monitoring Real-time</h2>
+                    <p class="text-xl opacity-90 max-w-2xl mx-auto">Pantau kondisi cuaca, kualitas udara, dan risiko banjir Kabupaten Bandung secara langsung</p>
+                </div>
+                
+                <div class="weather-overview">
+                    <div id="data-error-message" class="hidden bg-red-800 text-white p-4 rounded-lg mt-4 text-center">
+                        <p><i class="fas fa-exclamation-triangle mr-2"></i>Gagal mengambil data. Periksa koneksi atau API Key.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="info-card glass fade-in-up" style="animation-delay: 0.1s">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3>Suhu Saat Ini (Soreang)</h3>
+                                    <div class="value" id="current-temp">--°C</div>
+                                    <div class="label">Terasa seperti <span id="feels-like">--°C</span></div>
+                                    <p class="text-xs opacity-70 mt-2">Terakhir diperbarui: <span id="last-update">--</span></p>
+                                </div>
+                                <i class="fas fa-temperature-high weather-icon-lg"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card glass fade-in-up" style="animation-delay: 0.2s">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3>AQI (Soreang)</h3>
+                                    <div class="value" id="current-aqi">--</div>
+                                    <div class="label">Status: <span id="aqi-status" class="status-indicator">Memuat...</span></div>
+                                </div>
+                                <i class="fas fa-lungs weather-icon-lg"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card glass fade-in-up" style="animation-delay: 0.3s">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3>Risiko Banjir (Soreang)</h3>
+                                    <div class="value" id="flood-risk-value">--</div>
+                                    <div class="label">Status: <span id="flood-status" class="status-indicator">Memuat...</span></div>
+                                </div>
+                                <i class="fas fa-water weather-icon-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass rounded-2xl p-6 fade-in-up" style="animation-delay: 0.4s">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <i class="fas fa-map-marker-alt mr-3 text-yellow-300"></i>
+                            Kondisi di Kecamatan Lain (Klik untuk detail)
+                        </h3>
+                        <div id="weather-cards-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-4 pb-4 max-h-[700px] overflow-y-auto pr-2">
+                            <!-- Weather cards will be injected here -->
+                            <div class="text-center col-span-full p-4 text-white">
+                                <i class="fas fa-spinner fa-spin text-2xl"></i>
+                                <p>Memuat data kecamatan...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="map-section" class="py-16 bg-accent2 dark:bg-primary transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-primary dark:text-white text-4xl font-bold mb-4">Peta Interaktif</h2>
+                <p class="text-primary dark:text-white text-xl">Visualisasi data cuaca, kualitas udara, dan risiko banjir di Kabupaten Bandung</p>
+            </div>
+
+            <div class="map-buttons-container">
+                <button id="btn-owm-pollution-layer" onclick="toggleLayerFromButton(this, 'airPollutionLayer')" class="map-button">
+                    <i class="fas fa-smog"></i><span>Polusi Udara (OWM)</span>
+                </button>
+                <button id="btn-batas-administrasi" onclick="toggleLayerFromButton(this, 'batasAdministrasiLayer')" class="map-button active">
+                    <i class="fas fa-draw-polygon"></i><span>Batas Administrasi</span>
+                </button>
+                <button id="btn-bahaya-banjir" onclick="toggleLayerFromButton(this, 'bahayaBanjirLayer')" class="map-button">
+                    <i class="fas fa-water"></i><span>Bahaya Banjir</span>
+                </button>
+                <button id="btn-risiko-banjir" onclick="toggleLayerFromButton(this, 'risikoBanjirLayer')" class="map-button active">
+                    <i class="fas fa-exclamation-triangle"></i><span>Risiko Banjir</span>
+                </button>
+                <button id="btn-klasifikasi-das" onclick="toggleLayerFromButton(this, 'klasifikasiDasLayer')" class="map-button">
+                    <i class="fas fa-tree"></i><span>Klasifikasi DAS</span>
+                </button>
+                <button id="btn-locations" onclick="toggleLayerFromButton(this, 'monitoredLocationsGroup')" class="map-button active">
+                    <i class="fas fa-map-marker-alt"></i><span>Lokasi Kecamatan</span>
+                </button>
+                <button id="btn-basemap" onclick="changeBasemap()" class="map-button">
+                    <i class="fas fa-map"></i><span id="basemap-name">Basemap: Satelit</span>
+                </button>
+            </div>
+
+            <div class="relative">
+                <div id="map" class="h-96 lg:h-[600px] rounded-2xl shadow-2xl border-4 border-accent2 dark:border-primary"></div>
+                <div id="legend-inarisk-flood" class="legend-container" style="display: none;">
+                    <h3 class="legend-title">Legenda InaRISK</h3>
+                    <div class="legend-item"> <div class="legend-color" style="background-color: #ff0000;"></div> <span class="legend-label">Risiko Tinggi</span> </div>
+                    <div class="legend-item"> <div class="legend-color" style="background-color: #ffff00;"></div> <span class="legend-label">Risiko Sedang</span> </div>
+                    <div class="legend-item"> <div class="legend-color" style="background-color: #00ff00;"></div> <span class="legend-label">Risiko Rendah</span> </div>
+                </div>
+                <div class="absolute bottom-4 right-4 bg-accent1 text-primary px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 z-[1000] live-update-pulse">
+                    <div class="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                    <span class="text-sm font-medium">Live Update</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about-section" class="py-16 bg-secondary text-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12"> <h2 class="text-4xl font-bold mb-4">Tentang Sistem Ini</h2> <p class="text-xl max-w-2xl mx-auto">Sistem pemantauan cuaca, kualitas udara, dan risiko banjir berbasis WebGIS untuk Kabupaten Bandung</p> </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div class="glass rounded-2xl p-8"> <h3 class="text-xl font-semibold mb-4">Tujuan Sistem</h3> <p class="mb-4">Sistem ini dirancang untuk memberikan informasi real-time tentang kondisi cuaca, kualitas udara, dan risiko banjir di seluruh wilayah Kabupaten Bandung.</p> <p>Dengan antarmuka yang interaktif, pengguna dapat dengan mudah memantau berbagai parameter lingkungan dan membuat keputusan yang tepat berdasarkan data terkini.</p> </div>
+                <div class="glass rounded-2xl p-8"> <h3 class="text-xl font-semibold mb-4">Fitur Utama</h3> <ul class="space-y-3"> <li class="flex items-start"> <i class="fas fa-check-circle text-green-300 mt-1 mr-2"></i> <span>Pemantauan real-time kondisi cuaca, kualitas udara, dan risiko banjir</span> </li> <li class="flex items-start"> <i class="fas fa-check-circle text-green-300 mt-1 mr-2"></i> <span>Visualisasi data pada peta interaktif</span> </li> <li class="flex items-start"> <i class="fas fa-check-circle text-green-300 mt-1 mr-2"></i> <span>Akses mudah di berbagai perangkat</span> </li> <li class="flex items-start"> <i class="fas fa-check-circle text-green-300 mt-1 mr-2"></i> <span>Notifikasi kondisi ekstrim (fitur pengembangan)</span> </li> </ul> </div>
+            </div>
+            <div class="glass rounded-2xl p-8">
+                <h3 class="text-xl font-semibold mb-6 text-center">Sumber Data</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="text-center p-4 bg-white/10 rounded-lg"> <i class="fas fa-cloud text-3xl mb-2 text-blue-300"></i> <h4 class="font-semibold mb-1">OpenWeatherMap</h4> <p class="text-sm opacity-80">Data cuaca real-time</p> </div>
+                    <div class="text-center p-4 bg-white/10 rounded-lg"> <i class="fas fa-wind text-3xl mb-2 text-green-300"></i> <h4 class="font-semibold mb-1">WAQI</h4> <p class="text-sm opacity-80">Indeks kualitas udara</p> </div>
+                    <div class="text-center p-4 bg-white/10 rounded-lg"> <i class="fas fa-water text-3xl mb-2 text-blue-500"></i> <h4 class="font-semibold mb-1">InaRISK BNPB</h4> <p class="text-sm opacity-80">Data risiko bencana</p> </div>
+                    <div class="text-center p-4 bg-white/10 rounded-lg"> <i class="fas fa-map text-3xl mb-2 text-red-300"></i> <h4 class="font-semibold mb-1">OpenStreetMap</h4> <p class="text-sm opacity-80">Data geospasial</p> </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<footer class="bg-primary dark:bg-secondary py-12 text-white">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center"> <!-- Added text-center here -->
+                <h3 class="text-xl font-semibold mb-4">Bandung WeatherGuard</h3>
+                <p class="mb-4">Sistem monitoring cuaca, kualitas udara, dan risiko banjir real-time untuk Kabupaten Bandung.</p>
+            </div>
+            <div class="text-center"> <!-- Added text-center here -->
+                <h3 class="text-xl font-semibold mb-4">Kontak</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-center"> <!-- Added justify-center for inner flex items -->
+                        <i class="fas fa-map-marker-alt mr-3 text-accent2"></i>
+                        <span>Jl. Rancamulya No.15, Bandung</span>
+                    </div>
+                    <div class="flex items-center justify-center"> <!-- Added justify-center for inner flex items -->
+                        <i class="fas fa-envelope mr-3 text-accent2"></i>
+                        <span>frisckaa22@upi.edu</span>
+                    </div>
+                    <div class="flex items-center justify-center"> <!-- Added justify-center for inner flex items -->
+                        <i class="fas fa-phone mr-3 text-accent2"></i>
+                        <span>+62 856241118875</span>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center"> <!-- Added text-center here -->
+                <h3 class="text-xl font-semibold mb-4">Navigasi Cepat</h3>
+                <ul class="space-y-2">
+                    <li><a href="#dashboard" class="hover:text-accent2 transition-colors">Dashboard</a></li>
+                    <li><a href="#map-section" class="hover:text-accent2 transition-colors">Peta Interaktif</a></li>
+                    <li><a href="#about-section" class="hover:text-accent2 transition-colors">Tentang</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-white/15 mt-8 pt-8 text-center flex justify-center items-center flex-col">
+            <div class="flex items-center justify-center w-full">
+                <div class="rounded-xl overflow-hidden relative text-center p-4 group flex flex-col items-center max-w-sm hover:shadow-2xl transition-all duration-500 shadow-xl new-dev-card">
+                    <div class="group-hover:scale-105 transition-all dev-icon">
+                        <!-- Replaced SVG with an image tag -->
+                        <img src="asset/foto-friscka.jpg" alt="Developer Icon" class="w-16 h-16 rounded-full object-cover">
+                    </div>
+                    <div class="group-hover:pb-10 transition-all duration-500 delay-200 dev-details">
+                        <h1 class="font-semibold text-gray-700">Friscka Fitri Aditama</h1>
+                        <p class="text-gray-500 text-sm">Pengembang WebGIS</p>
+                    </div>
+                    <div class="flex items-center transition-all duration-500 delay-200 group-hover:bottom-3 -bottom-full absolute gap-2 justify-evenly w-full social-links-container">
+                        <div class="flex gap-3 text-2xl bg-gray-700 text-white p-1 hover:p-2 transition-all duration-500 delay-200 rounded-full shadow-sm social-links-group">
+                            <a href="https://github.com/bleachedd" target="_blank" class="hover:scale-110 transition-all duration-500 delay-200 social-link-item">
+                                <svg width="1em" height="1em" fill="currentColor" viewBox="0 0 1024 1024">
+                                    <path d="M511.6 76.3C264.3 76.2 64 276.4 64 523.5 64 718.9 189.3 885 363.8 946c23.5 5.9 19.9-10.8 19.9-22.2v-77.5c-135.7 15.9-141.2-73.9-150.3-88.9C215 726 171.5 718 184.5 703c30.9-15.9 62.4 4 98.9 57.9 26.4 39.1 77.9 32.5 104 26 5.7-23.5 17.9-44.5 34.7-60.8-140.6-25.2-199.2-111-199.2-213 0-49.5 16.3-95 48.3-131.7-20.4-60.5 1.9-112.3 4.9-120 58.1-5.2 118.5 41.6 123.2 45.3 33-8.9 70.7-13.6 112.9-13.6 42.4 0 80.2 4.9 113.5 13.9 11.3-8.6 67.3-48.8 121.3-43.9 2.9 7.7 24.7 58.3 5.5 118 32.4 36.8 48.9 82.7 48.9 132.3 0 102.2-59 188.1-200 212.9a127.5 127.5 0 0138.1 91v112.5c.8 9 0 17.9 15 17.9 177.1-59.7 304.6-227 304.6-424.1 0-247.2-200.4-447.3-447.5-447.3z"></path>
+                                </svg>
+                            </a>
+                            <a href="mailto:frisckaa22@upi.edu" class="hover:scale-110 transition-all duration-500 delay-200 social-link-item">
+                                <svg width="1em" height="1em" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <path d="M22 6l-10 7L2 6"></path>
+                                </svg>
+                            </a>
+                            <a href="https://www.linkedin.com/in/friscka-aditama-7a87072bb" target="_blank" class="hover:scale-110 transition-all duration-500 delay-200 social-link-item">
+                                <svg width="1em" height="1em" fill="currentColor" viewBox="0 0 960 1000">
+                                    <path d="M480 20c133.333 0 246.667 46.667 340 140s140 206.667 140 340c0 132-46.667 245-140 339S613.333 980 480 980c-132 0-245-47-339-141S0 632 0 500c0-133.333 47-246.667 141-340S348 20 480 20M362 698V386h-96v312h96m-48-352c34.667 0 52-16 52-48s-17.333-48-52-48c-14.667 0-27 4.667-37 14s-15 20.667-15 34c0 32 17.333 48 52 48m404 352V514c0-44-10.333-77.667-31-101s-47.667-35-81-35c-44 0-76 16.667-96 50h-2l-6-42h-84c1.333 18.667 2 52 2 100v212h98V518c0-12 1.333-20 4-24 8-25.333 24.667-38 50-38 32 0 48 22.667 48 68v174h98"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="mt-8">© <span id="current-year"></span> Bandung WeatherGuard. Seluruh hak cipta dilindungi.</p>
+        </div>
+    </div>
 </footer>
 
-<!-- JavaScript Libraries -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
-<script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
-<script src="https://unpkg.com/leaflet-measure@2.1.7/dist/leaflet-measure.js"></script>
-
-<script>
-// Mobile Menu Toggle
-document.getElementById('menu-toggle').addEventListener('click', function() {
-  document.getElementById('main-nav').classList.toggle('active');
-});
-
-// Smooth Scrolling for Navigation Links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function (e) {
-    e.preventDefault();
-    document.querySelector(this.getAttribute('href')).scrollIntoView({
-      behavior: 'smooth'
-    });
-  });
-});
-
-// Initialize map with custom options
-const map = L.map('map', {
-  zoomControl: false,
-  attributionControl: false
-}).setView([-6.903, 107.6510], 13);
-
-// Custom zoom control position
-L.control.zoom({
-  position: 'bottomright'
-}).addTo(map);
-
-// Custom attribution
-L.control.attribution({
-  position: 'bottomleft',
-  prefix: '© WebGIS Kota Bandung | Data by OpenStreetMap'
-}).addTo(map);
-
-// Basemaps with custom styles
-const basemapOSM = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '&copy; OpenStreetMap'
-}).addTo(map);
-
-const osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '© OpenStreetMap contributors, HOT'
-});
-
-const baseMapGoogle = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-  maxZoom: 20,
-  attribution: 'Map by Google',
-  subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-});
-
-const satelliteMapGoogle = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-  maxZoom: 20,
-  attribution: 'Imagery by Google',
-  subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-});
-
-const darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; CartoDB',
-  subdomains: 'abcd',
-  maxZoom: 19
-});
-
-// Controls with custom styling
-// Fullscreen control
-map.addControl(new L.Control.Fullscreen({
-  position: 'topright',
-  title: {
-    'false': 'View Fullscreen',
-    'true': 'Exit Fullscreen'
-  }
-}));
-
-// Home button for resetting view
-const homeButton = L.easyButton({
-  position: 'topright',
-  states: [{
-    stateName: 'default-state',
-    icon: 'fa-home',
-    title: 'Reset View',
-    onClick: function(btn, map) {
-      map.setView([-6.903, 107.6510], 13);
-    }
-  }]
-});
-homeButton.addTo(map);
-
-// Locate control with custom options
-const locateControl = L.control.locate({
-  position: 'topright',
-  strings: {
-    title: "Lokasi Saya"
-  },
-  locateOptions: {
-    enableHighAccuracy: true,
-    maxZoom: 16
-  }
-}).addTo(map);
-
-// Set up the measure control
-const measureControl = L.control.measure({
-  position: 'topright',
-  primaryLengthUnit: 'meters',
-  secondaryLengthUnit: 'kilometers',
-  primaryAreaUnit: 'sqmeters',
-  secondaryAreaUnit: 'hectares',
-  activeColor: '#BE5B50',
-  completedColor: '#641B2E'
-});
-measureControl.addTo(map);
 
 
-// Variables for layer states
-let legendVisible = true;
-let measureActive = false;
+    <!-- Leaflet and Plugins JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.fullscreen/Control.Fullscreen.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
+    <script src="https://unpkg.com/esri-leaflet@3.0.10/dist/esri-leaflet.js"></script>
+    <script src="https://unpkg.com/esri-leaflet-vector@4.2.3/dist/esri-leaflet-vector.js"></script>
 
-// Reset view button functionality
-document.getElementById('reset-view').addEventListener('click', function() {
-  map.setView([-6.903, 107.6510], 13);
-});
+    <script>
+        // --- Konfigurasi API Keys ---
+        const openWeatherApiKey = "11ff8556f92661caf8575a96a8c7950c";
+        const aqiApiKey = "ebeed99cd6b48352766114c4ce184ad6fb952821";
 
-// Toggle legend button functionality
-document.getElementById('toggle-legend').addEventListener('click', function() {
-  if (legendVisible) {
-    document.querySelector('.info.legend').style.display = 'none';
-    legendVisible = false;
-    this.innerHTML = '<i class="fas fa-list"></i> Show Legend';
-  } else {
-    document.querySelector('.info.legend').style.display = 'block';
-    legendVisible = true;
-    this.innerHTML = '<i class="fas fa-list"></i> Hide Legend';
-  }
-});
+        // --- Koordinat dan Zoom Peta Awal ---
+        const initialMapLat = -7.0100;
+        const initialMapLon = 107.5400;
+        const initialMapZoom = 10;
 
-// Measure tool button functionality
-document.getElementById('measure-tool').addEventListener('click', function() {
-  if (measureActive) {
-    map.removeControl(measureControl);
-    measureActive = false;
-    this.innerHTML = '<i class="fas fa-ruler"></i> Ukur Jarak';
-  } else {
-    measureControl.addTo(map);
-    measureActive = true;
-    this.innerHTML = '<i class="fas fa-times"></i> Tutup Ukur';
-  }
-});
+        // --- Elemen DOM (diinisialisasi di DOMContentLoaded) ---
+        let currentTempEl, feelsLikeEl, currentAqiEl, aqiStatusEl, floodRiskValueEl, floodStatusEl, lastUpdateEl;
+        let weatherCardsContainer, basemapNameEl, legendInaRiskFloodEl, dataErrorMessageEl;
+        let themeToggleButton, themeToggleCheckbox;
+        let heroTempEl, heroAqiEl, heroFloodEl, heroLastUpdateEl; // New hero elements
 
+        // --- Variabel Peta dan Layer ---
+        let map;
+        let basemapLayersConfig; // Mengganti nama basemapLayers menjadi basemapLayersConfig
+        let basemapKeys;
+        let currentBasemapIndex = 3; // Set initial to satellite
+        let airPollutionLayer; 
+        let monitoredLocationsGroup = L.layerGroup();
+        let batasAdministrasiLayer, bahayaBanjirLayer, risikoBanjirLayer, klasifikasiDasLayer;
 
-// Enhanced point symbology
-const symbologyPoint = {
-  radius: 8,
-  fillColor: "#8A2D3B",
-  color: "#641B2E",
-  weight: 2,
-  opacity: 1,
-  fillOpacity: 0.8
-};
+        // --- Data Lokasi Pemantauan - Semua 31 Kecamatan di Kabupaten Bandung ---
+        const monitoredLocations = [
+            { name: "Arjasari", lat: -7.1000, lon: 107.6000, floodRisk: "low" },
+            { name: "Baleendah", lat: -7.0000, lon: 107.6300, floodRisk: "high" },
+            { name: "Banjaran", lat: -7.0500, lon: 107.5800, floodRisk: "medium" },
+            { name: "Bojongsoang", lat: -7.0000, lon: 107.6500, floodRisk: "high" },
+            { name: "Cangkuang", lat: -6.9500, lon: 107.5200, floodRisk: "low" },
+            { name: "Cicalengka", lat: -7.0000, lon: 107.8000, floodRisk: "low" },
+            { name: "Cikancung", lat: -7.1200, lon: 107.7000, floodRisk: "low" },
+            { name: "Cilengkrang", lat: -6.9300, lon: 107.6800, floodRisk: "medium" },
+            { name: "Cileunyi", lat: -6.9200, lon: 107.7600, floodRisk: "medium" },
+            { name: "Cimaung", lat: -7.1800, lon: 107.5000, floodRisk: "low" },
+            { name: "Cimeunyan", lat: -7.0200, lon: 107.7000, floodRisk: "low" },
+            { name: "Ciparay", lat: -7.0500, lon: 107.7000, floodRisk: "medium" },
+            { name: "Ciwidey", lat: -7.1500, lon: 107.4000, floodRisk: "low" },
+            { name: "Dayeuhkolot", lat: -6.9800, lon: 107.6100, floodRisk: "high" },
+            { name: "Ibun", lat: -7.0800, lon: 107.7000, floodRisk: "low" },
+            { name: "Katapang", lat: -7.0060, lon: 107.5450, floodRisk: "high" },
+            { name: "Kertasari", lat: -7.2000, lon: 107.6000, floodRisk: "low" },
+            { name: "Kutawaringin", lat: -7.0000, lon: 107.7000, floodRisk: "low" },
+            { name: "Majalaya", lat: -7.0450, lon: 107.7500, floodRisk: "high" },
+            { name: "Margaasih", lat: -7.0000, lon: 107.5000, floodRisk: "medium" },
+            { name: "Margahayu", lat: -6.9700, lon: 107.5700, floodRisk: "medium" },
+            { name: "Nagreg", lat: -7.0000, lon: 107.9000, floodRisk: "low" },
+            { name: "Pacet", lat: -7.2000, lon: 107.7000, floodRisk: "low" },
+            { name: "Pameungpeuk", lat: -7.0140, lon: 107.6080, floodRisk: "low" },
+            { name: "Pangalengan", lat: -7.2100, lon: 107.5500, floodRisk: "low" },
+            { name: "Paseh", lat: -7.0700, lon: 107.7700, floodRisk: "medium" },
+            { name: "Pasirjambu", lat: -7.1500, lon: 107.5000, floodRisk: "low" },
+            { name: "Rancabali", lat: -7.1700, lon: 107.3800, floodRisk: "low" },
+            { name: "Rancaekek", lat: -6.9530, lon: 107.7550, floodRisk: "high" },
+            { name: "Solokan Jeruk", lat: -7.0000, lon: 107.7200, floodRisk: "medium" },
+            { name: "Soreang", lat: -7.0335, lon: 107.5208, floodRisk: "medium" }
+        ];
+        
+        // --- Fungsi Inisialisasi Utama ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inisialisasi Elemen DOM
+            currentTempEl = document.getElementById('current-temp');
+            feelsLikeEl = document.getElementById('feels-like');
+            currentAqiEl = document.getElementById('current-aqi');
+            aqiStatusEl = document.getElementById('aqi-status');
+            floodRiskValueEl = document.getElementById('flood-risk-value');
+            floodStatusEl = document.getElementById('flood-status');
+            lastUpdateEl = document.getElementById('last-update');
+            weatherCardsContainer = document.getElementById('weather-cards-container');
+            basemapNameEl = document.getElementById('basemap-name');
+            legendInaRiskFloodEl = document.getElementById('legend-inarisk-flood');
+            dataErrorMessageEl = document.getElementById('data-error-message');
+            themeToggleButton = document.getElementById('theme-toggle-button');
+            themeToggleCheckbox = document.getElementById('theme-toggle');
+            
+            // New hero elements
+            heroTempEl = document.getElementById('hero-temp');
+            heroAqiEl = document.getElementById('hero-aqi');
+            heroFloodEl = document.getElementById('hero-flood');
+            heroLastUpdateEl = document.getElementById('hero-last-update');
+            
+            setupThemeToggle();
+            initMap(); // Inisialisasi peta setelah DOM siap
+            fetchAndRenderAllData(); // Ambil data awal
+            
+            // Add scroll event for header effect
+            window.addEventListener('scroll', () => {
+                const header = document.getElementById('main-header');
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled-header');
+                } else {
+                    header.classList.remove('scrolled-header');
+                }
+            });
 
-// Layer: Jembatan PT
-const jembatanPT = L.layerGroup();
-$.getJSON("./asset/data-spasial/jembatan_pt.geojson", function (data) {
-  L.geoJSON(data, {
-    pointToLayer: function (feature, latlng) {
-      return L.circleMarker(latlng, symbologyPoint).on('mouseover', function (e) {
-        this.setStyle({
-          radius: 12,
-          fillColor: "#FBDB93"
-        });
-      }).on('mouseout', function (e) {
-        this.setStyle(symbologyPoint);
-      });
-    },
-    onEachFeature: function(feature, layer) {
-      if (feature.properties) {
-        const popupContent = `
-          <div class="custom-popup">
-            <div class="popup-header">Informasi Jembatan</div>
-            <div class="popup-content">
-              <p><strong>ID:</strong> ${feature.properties.id || 'N/A'}</p>
-              <p><strong>Nama:</strong> ${feature.properties.name || 'Jembatan'}</p>
-              <p><strong>Kondisi:</strong> ${feature.properties.condition || 'Baik'}</p>
-            </div>
-          </div>
-        `;
-        layer.bindPopup(popupContent);
-      }
-    }
-  }).addTo(jembatanPT);
-});
-jembatanPT.addTo(map);
-
-// Layer: Administrasi Kelurahan with enhanced styling
-const adminKelurahanAR = L.layerGroup();
-$.getJSON("./asset/data-spasial/admin_kelurahan_ln.geojson", function (data) {
-  L.geoJSON(data, {
-    style: function(feature) {
-      return {
-        color: "#641B2E",
-        weight: 3,
-        opacity: 0.7,
-        dashArray: '5, 10',
-        lineJoin: 'round'
-      };
-    },
-    onEachFeature: function(feature, layer) {
-      if (feature.properties) {
-        const popupContent = `
-          <div class="custom-popup">
-            <div class="popup-header">Informasi Administrasi</div>
-            <div class="popup-content">
-              <p><strong>Kelurahan:</strong> ${feature.properties.KELURAHAN || feature.properties.name || 'N/A'}</p>
-              <p><strong>Kecamatan:</strong> ${feature.properties.KECAMATAN || 'N/A'}</p>
-            </div>
-          </div>
-        `;
-        layer.bindPopup(popupContent);
-      }
-      
-      layer.on({
-        mouseover: function(e) {
-          layer.setStyle({
-            weight: 5,
-            color: "#BE5B50",
-            opacity: 1
-          });
-        },
-        mouseout: function(e) {
-          layer.setStyle({
-            weight: 3,
-            color: "#641B2E",
-            opacity: 0.7,
-            dashArray: '5, 10'
-          });
-        }
-      });
-    }
-  }).addTo(adminKelurahanAR);
-});
-adminKelurahanAR.addTo(map);
-
-// Layer: Land Cover with enhanced styling and interactivity
-const landcover = L.layerGroup();
-$.getJSON("./asset/data-spasial/landcover_ar.geojson", function (data) {
-  L.geoJSON(data, {
-    style: function (feature) {
-      // Custom color map for each landcover type
-      const colorMap = {
-        'Danau/Situ': { fill: "#97DBF2", border: "#4065EB" },
-        'Empang': { fill: "#97DBF2", border: "#4065EB" },
-        'Sungai': { fill: "#97DBF2", border: "#4065EB" },
-        'Hutan Rimba': { fill: "#38A800", border: "#38A800" },
-        'Perkebunan/Kebun': { fill: "#E9FFBE", border: "#38A800" },
-        'Permukiman dan Tempat Kegiatan': { fill: "#FBDB93", border: "#BE5B50" },
-        'Sawah': { fill: "#01FBBB", border: "#4065EB" },
-        'Semak Belukar': { fill: "#C9F4CA", border: "#00A52F" },
-        'Tanah Kosong/Gundul': { fill: "#FDFDFD", border: "#BE5B50" },
-        'Tegalan/Ladang': { fill: "#EDFF85", border: "#38A800" },
-        'Vegetasi Non Budidaya Lainnya': { fill: "#8BC276", border: "#38A800" }
-      };
-      
-      const landType = feature.properties.REMARK;
-      const colors = colorMap[landType] || { fill: "#CCCCCC", border: "#999999" };
-      
-      return {
-        fillColor: colors.fill,
-        fillOpacity: 0.6,
-        color: colors.border,
-        weight: 1,
-        opacity: 0.8
-      };
-    },
-    onEachFeature: function (feature, layer) {
-      // Enhanced popup with additional information
-      const area = feature.properties.SHAPE_Area ? (feature.properties.SHAPE_Area / 10000).toFixed(2) + ' Ha' : 'Tidak tersedia';
-      
-      const popupContent = `
-        <div class="custom-popup">
-          <div class="popup-header">Informasi Tutupan Lahan</div>
-          <div class="popup-content">
-            <p><strong>Jenis:</strong> ${feature.properties.REMARK}</p>
-            <p><strong>Luas Area:</strong> ${area}</p>
-          </div>
-        </div>
-      `;
-      
-      layer.bindPopup(popupContent);
-      
-      // Hover effects
-      layer.on({
-        mouseover: function(e) {
-          layer.setStyle({
-            fillOpacity: 0.85,
-            weight: 3
-          });
-        },
-        mouseout: function(e) {
-          layer.setStyle({
-            fillOpacity: 0.6,
-            weight: 1
-          });
-        }
-      });
-    }
-  }).addTo(landcover);
-});
-landcover.addTo(map);
-
-// Enhanced Layer controls with custom styling
-const baseMaps = {
-  "OpenStreetMap": basemapOSM,
-  "OSM Humanitarian": osmHOT,
-  "Google Maps": baseMapGoogle,
-  "Google Satellite": satelliteMapGoogle,
-  "Dark Mode": darkMap
-};
-
-const overlayMaps = {
-  "Tutupan Lahan": landcover,
-  "Batas Administrasi": adminKelurahanAR,
-  "Jembatan": jembatanPT
-};
-
-const layerControl = L.control.layers(baseMaps, overlayMaps, {
-  position: 'topright',
-  collapsed: false
-}).addTo(map);
-
-// Enhanced Legend
-const legend = L.control({position: 'bottomleft'});
-
-legend.onAdd = function (map) {
-  const div = L.DomUtil.create('div', 'info legend');
-  div.innerHTML = `
-    <h4>Legenda Tutupan Lahan</h4>
-    <div class="legend-items">
-      <div class="legend-item">
-        <span class="legend-color" style="background: #97DBF2;"></span>
-        <span>Danau/Situ/Empang/Sungai</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color" style="background: #38A800;"></span>
-        <span>Hutan Rimba</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color" style="background: #E9FFBE;"></span>
-        <span>Perkebunan/Kebun</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color" style="background: #FBDB93;"></span>
-        <span>Permukiman dan Tempat Kegiatan</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color" style="background: #01FBBB;"></span>
-        <span>Sawah</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color" style="background: #C9F4CA;"></span>
-        <span>Semak Belukar</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color" style="background: #FDFDFD;"></span>
-        <span>Tanah Kosong/Gundul</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color" style="background: #EDFF85;"></span>
-        <span>Tegalan/Ladang</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color" style="background: #8BC276;"></span>
-        <span>Vegetasi Non Budidaya Lainnya</span>
-      </div>
-    </div>
-    
-    <h4 style="margin-top: 15px;">Simbol Lainnya</h4>
-    <div class="legend-items">
-      <div class="legend-item">
-        <span class="legend-color" style="background: #8A2D3B; border-radius: 50%;"></span>
-        <span>Jembatan</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-color" style="background: transparent; border: 2px dashed #641B2E;"></span>
-        <span>Batas Administrasi</span>
-      </div>
-    </div>
-  `;
-  return div;
-};
-
-legend.addTo(map);
-
-// Add info panel on the top left
-const infoPanel = L.control({position: 'topleft'});
-
-infoPanel.onAdd = function (map) {
-  const div = L.DomUtil.create('div', 'info');
-  div.style.padding = '6px 8px';
-  div.style.background = 'rgba(255,255,255,0.8)';
-  div.style.borderRadius = '5px';
-  div.style.boxShadow = '0 0 15px rgba(0,0,0,0.2)';
-  div.innerHTML = '<h4 style="margin: 0 0 5px; color: #641B2E;">Kota Bandung</h4>' + 
-                  '<p style="margin: 0; font-size: 12px;">Hover pada area untuk melihat informasi</p>';
-  return div;
-};
-
-infoPanel.addTo(map);
-
-
-
-// Add scale control
-L.control.scale({
-  metric: true,
-  imperial: false,
-  position: 'bottomleft'
-}).addTo(map);
-
-// Add smooth scroll animations
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, { threshold: 0.1 });
-
-document.querySelectorAll('section').forEach(section => {
-  observer.observe(section);
-});
-
-// Preloader
-window.addEventListener('load', function() {
-  // Add preloader animation here if needed
-  console.log('WebGIS Kota Bandung loaded successfully');
-});
-
-// Add layer switcher animation
-document.querySelector('.leaflet-control-layers-toggle').addEventListener('click', function() {
-  console.log('Layer control toggled');
-});
-
-// Helper function for responsiveness
-function handleResponsive() {
-  if (window.innerWidth <= 768) {
-    // Mobile-specific adjustments
-    map.setMinZoom(11);
-  } else {
-    // Desktop-specific adjustments
-    map.setMinZoom(10);
-  }
-}
-
-// Run on load and resize
-handleResponsive();
-window.addEventListener('resize', handleResponsive);
-
-// Statistics counter animation
-function animateValue(id, start, end, duration) {
-  if (document.getElementById(id)) {
-    let startTimestamp = null;
-    const step = (timestamp) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      const value = Math.floor(progress * (end - start) + start);
-      document.getElementById(id).textContent = value;
-      if (progress < 1) {
-        window.requestAnimationFrame(step);
-      }
-    };
-    window.requestAnimationFrame(step);
-  }
-}
-
-// Welcome message
-console.log('Welcome to WebGIS Kota Bandung - Interactive Spatial Exploration');
-</script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-const ctx = document.getElementById('bandungChart').getContext('2d');
-const bandungChart = new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: ['Wisatawan', 'Hotel', 'Kuliner', 'Transportasi', 'Event'],
-    datasets: [{
-      label: 'Indeks Populer Bandung',
-      data: [85, 70, 90, 60, 75],
-      backgroundColor: [
-        '#641B2E',
-        '#8A2D3B',
-        '#BE5B50',
-        '#FBDB93',
-        '#333'
-      ],
-      borderRadius: 5
-    }]
-  },
-  options: {
-    responsive: true,
-    scales: {
-      y: {
-        beginAtZero: true
-      }
-    }
-  }
-});
-</script>
-<script>
-    const apiKey = "11ff8556f92661caf8575a96a8c7950c";
-    const aqiApiKey = "ebeed99cd6b48352766114c4ce184ad6fb952821"; // Ganti dengan token WAQI yang valid
-    const lat = -6.9147;
-    const lon = 107.6098;
-
-    // Ambil data cuaca dari OpenWeatherMap
-    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=id`;
-
-    fetch(apiUrl)
-      .then(response => response.json())
-      .then(data => {
-        const cuaca = data.weather[0].description;
-        const suhu = data.main.temp;
-        const kelembapan = data.main.humidity;
-        const angin = data.wind.speed;
-        const waktu = new Date().toLocaleString("id-ID", {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false,
-          timeZone: 'Asia/Jakarta'
+            const currentYearEl = document.getElementById('current-year');
+            if (currentYearEl) currentYearEl.textContent = new Date().getFullYear();
         });
 
-        const weatherHTML = `
-          <strong>${cuaca.charAt(0).toUpperCase() + cuaca.slice(1)}</strong><br
-          🌡️ Suhu: ${suhu}°C<br>
-          💧 Kelembapan: ${kelembapan}%<br>
-          💨 Angin: ${angin} m/s<br>
-          ⏰ Update: ${waktu} WIB<br>
-          <small>Sumber: OpenWeatherMap</small>
-        `;
-        document.getElementById("weather-info").innerHTML = weatherHTML;
-      })
-      .catch(error => {
-        document.getElementById("weather-info").innerHTML = "Gagal memuat data cuaca.";
-        console.error("Cuaca Error:", error);
-      });
-
-    // Ambil data AQI dari WAQI
-    const aqiUrl = `https://api.waqi.info/feed/geo:${lat};${lon}/?token=${aqiApiKey}`;
-
-    fetch(aqiUrl)
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === "ok") {
-          const aqi = data.data.aqi;
-          const dominan = data.data.dominentpol || "-";
-          const waktu = new Date().toLocaleString("id-ID", {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-            timeZone: 'Asia/Jakarta'
-          });
-
-          const aqiHTML = `
-            <strong>Indeks Kualitas Udara: ${aqi}</strong><br>
-            🧪 Polutan Dominan: ${dominan.toUpperCase()}<br>
-            ⏰ Update: ${waktu} WIB<br>
-            <small>Sumber: World Air Quality Index</small>
-          `;
-          document.getElementById("aqi-info").innerHTML = aqiHTML;
-        } else {
-          document.getElementById("aqi-info").innerHTML = "Gagal memuat data AQI.";
+        // --- Pengaturan Tema (Gelap/Terang) ---
+        function setupThemeToggle() {
+            if (!themeToggleCheckbox) return;
+            const isDarkMode = localStorage.getItem('theme') === 'dark' || 
+                               (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDarkMode) {
+                document.documentElement.classList.add('dark');
+                themeToggleCheckbox.checked = true;
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggleCheckbox.checked = false;
+            }
+            themeToggleCheckbox.addEventListener('change', () => {
+                document.documentElement.classList.toggle('dark', themeToggleCheckbox.checked);
+                localStorage.setItem('theme', themeToggleCheckbox.checked ? 'dark' : 'light');
+            });
         }
-      })
-      .catch(error => {
-        document.getElementById("aqi-info").innerHTML = "Terjadi kesalahan saat mengambil data AQI.";
-        console.error("AQI Error:", error);
-      });
+
+        // --- Inisialisasi Peta Leaflet ---
+        function initMap() {
+            if (map) map.remove(); // Hapus peta lama jika ada (untuk re-inisialisasi)
+            map = L.map('map').setView([initialMapLat, initialMapLon], initialMapZoom);
+
+            basemapLayersConfig = {
+                'OpenStreetMap': L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }),
+                'OSM HOT': L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OSM, HOT' }),
+                'Google Street': L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '© Google', subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] }),
+                'Google Satelit': L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20, attribution: '© Google', subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] }),
+                'CartoDB Dark': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB', subdomains: 'abcd', maxZoom: 19 })
+            };
+            basemapKeys = Object.keys(basemapLayersConfig);
+            basemapLayersConfig[basemapKeys[currentBasemapIndex]].addTo(map);
+            if (basemapNameEl) basemapNameEl.textContent = `Basemap: ${basemapKeys[currentBasemapIndex]}`;
+
+            airPollutionLayer = L.tileLayer('https://tile.openweathermap.org/map/pollution_new/{z}/{x}/{y}.png?appid=' + openWeatherApiKey, {
+                maxZoom: 18, attribution: '© OpenWeatherMap'
+            });
+
+            if (typeof L.esri !== 'undefined') {
+                batasAdministrasiLayer = L.esri.dynamicMapLayer({ url: 'https://gis.bnpb.go.id/server/rest/services/inarisk/batas_administrasi/MapServer', layers: [2], opacity: 0.7, attribution: 'InaRISK BNPB' });
+                bahayaBanjirLayer = L.esri.imageMapLayer({ url: 'https://gis.bnpb.go.id/server/rest/services/inarisk/layer_bahaya_banjir/ImageServer', opacity: 0.6, attribution: 'InaRISK BNPB', useCors:false });
+                risikoBanjirLayer = L.esri.imageMapLayer({ url: 'https://gis.bnpb.go.id/server/rest/services/inarisk/layer_risiko_banjir/ImageServer', opacity: 0.6, attribution: 'InaRISK BNPB', useCors:false });
+                klasifikasiDasLayer = L.esri.dynamicMapLayer({ url: 'https://gis.bnpb.go.id/server/rest/services/inarisk/Klasifikasi_DAS_KLHK/MapServer', opacity: 0.7, attribution: 'InaRISK BNPB' });
+                
+                // Add required layers on initial load
+                batasAdministrasiLayer.addTo(map);
+                risikoBanjirLayer.addTo(map);
+            } else {
+                console.error("Esri Leaflet (L.esri) not loaded. InaRISK layers cannot be initialized.");
+                displayModal("Kesalahan Pustaka Peta", "Pustaka peta Esri Leaflet tidak termuat dengan benar. Layer InaRISK mungkin tidak tersedia.");
+            }
+            
+            monitoredLocationsGroup.addTo(map);
+
+            L.control.fullscreen({ position: 'topleft', title: 'Fullscreen', titleCancel: 'Exit Fullscreen' }).addTo(map);
+            L.control.locate({ position: 'topleft', strings: { title: "My Location" }, locateOptions: { maxZoom: 16 }}).addTo(map);
+            
+            addMonitoredLocationMarkers(); // Tambahkan marker setelah peta diinisialisasi
+            updateLegendVisibility(); // Update visibility of legend
+        }
+
+        // --- Pengambilan Data ---
+        async function fetchWeatherDataForLocation(location) {
+            if (openWeatherApiKey === "YOUR_OPENWEATHERMAP_API_KEY" || !openWeatherApiKey) {
+                console.warn("OpenWeatherMap API Key tidak valid atau belum diatur.");
+                return null; // Kembalikan null jika API key tidak valid
+            }
+            try {
+                const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lon}&appid=${openWeatherApiKey}&units=metric&lang=id`;
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error(`HTTP error ${response.status} for ${location.name} (Weather)`);
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching weather for ${location.name}:`, error);
+                return null;
+            }
+        }
+
+        async function fetchAirQualityDataForLocation(location) {
+             if (aqiApiKey === "" || !aqiApiKey) {
+                console.warn("WAQI API Key tidak valid atau belum diatur.");
+                return null; // Kembalikan null jika API key tidak valid
+            }
+            try {
+                const apiUrl = `https://api.waqi.info/feed/geo:${location.lat};${location.lon}/?token=${aqiApiKey}`;
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error(`HTTP error ${response.status} for ${location.name} (AQI)`);
+                const data = await response.json();
+                if (data.status === "ok" && data.data) return data.data;
+                throw new Error(data.data ? JSON.stringify(data.data) : `Invalid AQI data for ${location.name}`);
+            } catch (error) {
+                console.error(`Error fetching AQI for ${location.name}:`, error);
+                return null;
+            }
+        }
+        
+        async function fetchAndRenderAllData() {
+            if(dataErrorMessageEl) dataErrorMessageEl.classList.add('hidden'); // Sembunyikan pesan error lama
+
+            let hasAnyDataError = false;
+            const fetchPromises = monitoredLocations.map(async (location) => {
+                location.weatherData = await fetchWeatherDataForLocation(location);
+                location.aqiData = await fetchAirQualityDataForLocation(location);
+                if (!location.weatherData || !location.aqiData) hasAnyDataError = true;
+            });
+
+            await Promise.all(fetchPromises);
+
+            if (hasAnyDataError && dataErrorMessageEl) {
+                dataErrorMessageEl.classList.remove('hidden');
+            }
+            
+            if (monitoredLocations.length > 0) {
+                const mainLocation = monitoredLocations.find(loc => loc.name === "Soreang") || monitoredLocations[0];
+                updateMainDashboard(mainLocation);
+                updateHeroSummary(mainLocation); // Update hero summary card
+            }
+            renderDynamicWeatherCards();
+            addMonitoredLocationMarkers(); // Update markers with potentially new data
+
+            setTimeout(fetchAndRenderAllData, 5 * 60 * 1000); // Refresh data setiap 5 menit
+        }
+        
+        // --- Update hero summary card ---
+        function updateHeroSummary(locationData) {
+            if (!locationData) return;
+            
+            const weather = locationData.weatherData;
+            const aqiInfo = locationData.aqiData;
+            
+            // Update temperature
+            if (weather && weather.main) {
+                heroTempEl.textContent = `${Math.round(weather.main.temp)}°C`;
+            } else {
+                heroTempEl.textContent = 'N/A';
+            }
+            
+            // Update AQI
+            if (aqiInfo && typeof aqiInfo.aqi !== 'undefined') {
+                heroAqiEl.textContent = aqiInfo.aqi !== '-' ? aqiInfo.aqi : '--';
+            } else {
+                heroAqiEl.textContent = 'N/A';
+            }
+            
+            // Update flood risk
+            const floodDesc = getFloodRiskDescription(locationData.floodRisk);
+            heroFloodEl.textContent = floodDesc;
+            
+            // Update last update time
+            const now = new Date();
+            const formattedTime = now.toLocaleTimeString('id-ID', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false,
+                timeZone: 'Asia/Jakarta'
+            });
+            heroLastUpdateEl.textContent = formattedTime;
+        }
+
+
+        // --- Pembaruan UI ---
+        function updateMainDashboard(locationData) {
+            if (!locationData) { // Handle if locationData is undefined
+                currentTempEl.textContent = 'N/A'; feelsLikeEl.textContent = 'N/A'; lastUpdateEl.textContent = '--';
+                currentAqiEl.textContent = 'N/A'; aqiStatusEl.textContent = 'N/A'; aqiStatusEl.className = 'status-indicator';
+                floodRiskValueEl.textContent = 'N/A'; floodStatusEl.textContent = 'N/A'; floodStatusEl.className = 'status-indicator';
+                return;
+            }
+
+            const weather = locationData.weatherData;
+            const aqiInfo = locationData.aqiData;
+
+            if (weather && weather.main) {
+                currentTempEl.textContent = `${Math.round(weather.main.temp)}°C`;
+                feelsLikeEl.textContent = `${Math.round(weather.main.feels_like)}°C`;
+                lastUpdateEl.textContent = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' });
+            } else {
+                currentTempEl.textContent = 'N/A'; feelsLikeEl.textContent = 'N/A'; lastUpdateEl.textContent = '--';
+            }
+
+            if (aqiInfo && typeof aqiInfo.aqi !== 'undefined') {
+                currentAqiEl.textContent = aqiInfo.aqi !== '-' ? aqiInfo.aqi : '--';
+                const status = getAQIStatusText(aqiInfo.aqi);
+                const statusClass = getAQIStatusClass(aqiInfo.aqi);
+                aqiStatusEl.textContent = status;
+                aqiStatusEl.className = `status-indicator ${statusClass}`;
+            } else {
+                currentAqiEl.textContent = 'N/A'; aqiStatusEl.textContent = 'N/A'; aqiStatusEl.className = 'status-indicator';
+            }
+            
+            const floodDesc = getFloodRiskDescription(locationData.floodRisk);
+            const floodClass = getFloodRiskClass(locationData.floodRisk);
+            floodRiskValueEl.textContent = floodDesc;
+            floodStatusEl.textContent = floodDesc;
+            floodStatusEl.className = `status-indicator ${floodClass}`;
+        }
+
+        function renderDynamicWeatherCards() {
+            if (!weatherCardsContainer) return;
+            weatherCardsContainer.innerHTML = ''; 
+
+            monitoredLocations.forEach((location, index) => {
+                const weather = location.weatherData;
+                const aqiInfo = location.aqiData;
+
+                const temp = weather && weather.main ? Math.round(weather.main.temp) : '--';
+                const humidity = weather && weather.main ? weather.main.humidity : '--';
+                const windSpeed = weather && weather.wind ? weather.wind.speed.toFixed(1) : '--';
+                const aqiValue = aqiInfo && typeof aqiInfo.aqi !== 'undefined' && aqiInfo.aqi !== '-' ? aqiInfo.aqi : '--';
+                const aqiStatus = getAQIStatusText(aqiValue);
+                const floodStatus = getFloodRiskDescription(location.floodRisk);
+                const floodClass = getFloodRiskClass(location.floodRisk);
+
+                // Determine weather icon based on condition
+                let weatherIcon = 'fa-cloud';
+                if (weather && weather.weather && weather.weather[0]) {
+                    const condition = weather.weather[0].main.toLowerCase();
+                    if (condition.includes('clear')) weatherIcon = 'fa-sun';
+                    else if (condition.includes('rain')) weatherIcon = 'fa-cloud-rain';
+                    else if (condition.includes('cloud')) weatherIcon = 'fa-cloud';
+                    else if (condition.includes('thunder')) weatherIcon = 'fa-bolt';
+                }
+
+                const cardHtml = `
+                <div class="compact-weather-card fade-in-up" onclick="updateMainDashboard(monitoredLocations[${index}])">
+                    <div class="compact-weather-card-header">
+                        <div class="location-name">${location.name}</div>
+                        <div class="weather-icon"><i class="fas ${weatherIcon}"></i></div>
+                    </div>
+                    <div class="compact-weather-card-body">
+                        <div class="weather-data-item">
+                            <div class="data-label">Suhu</div>
+                            <div class="data-value">${temp}°C</div>
+                        </div>
+                        <div class="weather-data-item">
+                            <div class="data-label">Kelembapan</div>
+                            <div class="data-value">${humidity}%</div>
+                        </div>
+                        <div class="weather-data-item">
+                            <div class="data-label">Angin</div>
+                            <div class="data-value">${windSpeed} km/h</div>
+                        </div>
+                        <div class="weather-data-item">
+                            <div class="data-label">AQI</div>
+                            <div class="data-value">${aqiValue}</div>
+                        </div>
+                    </div>
+                    <div class="flood-risk ${floodClass}">
+                        Risiko Banjir: ${floodStatus}
+                    </div>
+                </div>
+                `;
+                weatherCardsContainer.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // --- Helper Functions ---
+        function getWindDirection(degrees) {
+            const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+            return directions[Math.round(degrees / 45) % 8];
+        }
+        
+        function getAQIStatusText(aqi) { // For WAQI data (0-500+)
+            if (aqi === undefined || aqi === null || aqi === '-') return 'Tidak Tersedia';
+            if (aqi <= 50) return 'Sangat Baik';
+            if (aqi <= 100) return 'Baik';
+            if (aqi <= 150) return 'Sedang';
+            if (aqi <= 200) return 'Tidak Sehat';
+            if (aqi <= 300) return 'Sangat Tidak Sehat';
+            return 'Berbahaya';
+        }
+
+        function getAQIStatusClass(aqi) { // For WAQI data, returns CSS class for .card3
+            if (aqi === undefined || aqi === null || aqi === '-') return 'aqi-nodata-card3';
+            if (aqi <= 50) return 'aqi-excellent';
+            if (aqi <= 100) return 'aqi-good';
+            if (aqi <= 150) return 'aqi-moderate';
+            if (aqi <= 200) return 'aqi-poor'; // Map 'Tidak Sehat' to poor
+            if (aqi <= 300) return 'aqi-very-poor'; // Map 'Sangat Tidak Sehat' to very-poor
+            return 'aqi-hazardous';
+        }
+        
+        function getFloodRiskDescription(riskLevel) { // From 'low', 'medium', 'high'
+            if (riskLevel === "high") return "Tinggi";
+            if (riskLevel === "medium") return "Sedang";
+            return "Rendah";
+        }
+
+        function getFloodRiskClass(riskLevel) { // CSS class for dashboard general status
+            if (riskLevel === "high") return 'status-high-risk';
+            if (riskLevel === "medium") return 'status-medium-risk';
+            return 'status-low-risk';
+        }
+
+        // --- Map Interaction Functions ---
+        function addMonitoredLocationMarkers() {
+            monitoredLocationsGroup.clearLayers();
+            monitoredLocations.forEach(location => {
+                const customIcon = L.divIcon({
+                    className: 'custom-location-icon', html: `<i class="fas fa-map-marker-alt"></i>`,
+                    iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15]
+                });
+                const marker = L.marker([location.lat, location.lon], { icon: customIcon });
+                
+                marker.bindPopup(`<b>${location.name}</b><br>Memuat data...`);
+                marker.on('click', function() {
+                    this.setPopupContent(`<b>${location.name}</b><br><i class="fas fa-spinner fa-spin"></i> Memuat...`); this.openPopup();
+                    Promise.all([fetchWeatherDataForLocation(location), fetchAirQualityDataForLocation(location)])
+                        .then(([weather, aqiData]) => { // weather is already location.weatherData, aqiData is location.aqiData
+                            let popupContent = `<b>${location.name}</b><br>`;
+                            if (location.weatherData && location.weatherData.main) {
+                                popupContent += `Suhu: ${Math.round(location.weatherData.main.temp)}°C (${location.weatherData.weather[0].description})<br>`;
+                            } else popupContent += `Cuaca: N/A<br>`;
+                            if (location.aqiData && typeof location.aqiData.aqi !== 'undefined') {
+                                popupContent += `AQI: ${location.aqiData.aqi} (${getAQIStatusText(location.aqiData.aqi)})<br>`;
+                            } else popupContent += `AQI: N/A<br>`;
+                            popupContent += `Risiko Banjir: ${getFloodRiskDescription(location.floodRisk)}`;
+                            this.setPopupContent(popupContent);
+                        });
+                });
+                monitoredLocationsGroup.addLayer(marker);
+            });
+        }
+        
+        function changeBasemap() { // Removed button param as it's not used for direct DOM manipulation here
+            if (map && basemapLayersConfig && basemapKeys.length > 0) {
+                map.removeLayer(basemapLayersConfig[basemapKeys[currentBasemapIndex]]);
+                currentBasemapIndex = (currentBasemapIndex + 1) % basemapKeys.length;
+                const nextBasemapName = basemapKeys[currentBasemapIndex];
+                basemapLayersConfig[nextBasemapName].addTo(map);
+                if (basemapNameEl) basemapNameEl.textContent = `Basemap: ${nextBasemapName}`;
+            }
+        }
+
+        function toggleLayer(layerKey, shouldAdd) {
+            let layerInstance;
+            switch(layerKey) {
+                case 'airPollutionLayer': layerInstance = airPollutionLayer; break;
+                case 'monitoredLocationsGroup': layerInstance = monitoredLocationsGroup; break;
+                case 'batasAdministrasiLayer': layerInstance = batasAdministrasiLayer; break;
+                case 'bahayaBanjirLayer': layerInstance = bahayaBanjirLayer; break;
+                case 'risikoBanjirLayer': layerInstance = risikoBanjirLayer; break;
+                case 'klasifikasiDasLayer': layerInstance = klasifikasiDasLayer; break;
+                default: console.warn("Unknown layer key:", layerKey); return;
+            }
+
+            if (!layerInstance) {
+                // console.warn(`Layer ${layerKey} is not initialized.`);
+                // displayModal("Layer Error", `Layer ${layerKey} belum siap. Coba beberapa saat lagi.`);
+                if(layerKey === 'airPollutionLayer' && openWeatherApiKey === "YOUR_OPENWEATHERMAP_API_KEY"){
+                     displayModal("API Key Diperlukan", "Harap masukkan API Key OpenWeatherMap Anda untuk layer polusi udara OWM.");
+                } else if (layerKey !== 'monitoredLocationsGroup' && layerKey !== 'airPollutionLayer' && typeof L.esri === 'undefined') {
+                     displayModal("Kesalahan Pustaka Peta", "Pustaka peta Esri Leaflet tidak termuat. Layer InaRISK tidak bisa ditampilkan.");
+                } else {
+                     // displayModal("Layer Error", `Layer ${layerKey} belum siap atau ada masalah.`);
+                }
+                return;
+            }
+
+            if (shouldAdd) {
+                if (!map.hasLayer(layerInstance)) map.addLayer(layerInstance);
+            } else {
+                if (map.hasLayer(layerInstance)) map.removeLayer(layerInstance);
+            }
+            
+            // Update legend visibility when flood layers change
+            if (layerKey === 'risikoBanjirLayer' || layerKey === 'bahayaBanjirLayer') {
+                updateLegendVisibility();
+            }
+        }
+
+        function toggleLayerFromButton(button, layerKey) {
+            const isActive = button.classList.contains('active');
+            button.classList.toggle('active');
+            toggleLayer(layerKey, !isActive);
+        }
+        
+        function updateLegendVisibility() {
+            if (!legendInaRiskFloodEl) return;
+            
+            // Check if either flood layer is active
+            const isRisikoActive = map.hasLayer(risikoBanjirLayer);
+            const isBahayaActive = map.hasLayer(bahayaBanjirLayer);
+            
+            if (isRisikoActive || isBahayaActive) {
+                legendInaRiskFloodEl.style.display = 'block';
+            } else {
+                legendInaRiskFloodEl.style.display = 'none';
+            }
+        }
+        
+        function displayModal(title, message) {
+            let existingModal = document.getElementById('custom-modal');
+            if (existingModal) existingModal.remove();
+            const modalHTML = `
+                <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[10000]" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                    <div class="bg-white dark:bg-secondary p-6 rounded-lg shadow-xl max-w-sm w-full">
+                        <h4 id="modal-title" class="text-lg font-semibold text-primary dark:text-accent2 mb-2">${title}</h4>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">${message}</p>
+                        <button onclick="document.getElementById('custom-modal').remove()" class="w-full map-button active">Tutup</button>
+                    </div>
+                </div>`;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            const closeButton = document.querySelector('#custom-modal button');
+            if (closeButton) closeButton.focus();
+        }
     </script>
 </body>
 </html>

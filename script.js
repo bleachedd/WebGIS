@@ -1,134 +1,94 @@
-// Initialize the map
-const map = L.map('map');
-map.setView([-6.903, 107.6510], 13);
+// Inisialisasi peta
+const map = L.map('map').setView([-6.914744, 107.609810], 12); // Koordinat Bandung
 
-// Create basemaps
-const basemapOSM = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-const osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team hosted by OpenStreetMap France'
+// Contoh data kualitas udara
+const airQualityData = [
+  { lat: -6.914744, lon: 107.609810, aqi: 75, city: "Bandung" },
+  { lat: -6.917464, lon: 107.619123, aqi: 90, city: "Bandung Utara" },
+  { lat: -6.920123, lon: 107.599876, aqi: 60, city: "Bandung Selatan" }
+];
+
+// Tambahkan marker ke peta
+airQualityData.forEach(location => {
+  const marker = L.marker([location.lat, location.lon]).addTo(map);
+  marker.bindPopup(`<b>${location.city}</b><br>AQI: ${location.aqi}`);
+  marker.on('click', () => {
+    updateChart(location.city);
+    updatePrediction(location.aqi);
+  });
 });
 
-const baseMapGoogle = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-    maxZoom: 20,
-    attribution: 'Map by <a href="https://maps.google.com/">Google</a>',
-    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-});
-
-// Add fullscreen control
-map.addControl(new L.Control.Fullscreen());
-
-// Home configuration (can be reused later if needed)
-const home = {
-    lat: -6.903,
-    lng: 107.6510,
-    zoom: 13
-};
-
-// Add "My Location" control
-map.addControl(
-    L.control.locate({
-        locateOptions: {
-            enableHighAccuracy: true
+// Inisialisasi Chart.js
+const ctx = document.getElementById('aqiChart').getContext('2d');
+let aqiChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+    datasets: [{
+      label: 'AQI',
+      data: [70, 65, 80, 75, 90, 85, 60],
+      borderColor: 'var(--accent-color)',
+      backgroundColor: 'rgba(0,123,255,0.1)',
+      fill: true
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        labels: {
+          color: 'var(--text-color)'
         }
-    })
-);
-
-// Point symbology configuration
-const symbologyPoint = {
-    radius: 5,
-    fillColor: "#9dfc03",
-    color: "#000",
-    weight: 1,
-    opacity: 1,
-    fillOpacity: 0.8
-};
-
-// Layer: Jembatan PT
-const jembatanPT = new L.LayerGroup();
-$.getJSON("./asset/data-spasial/jembatan_pt.geojson", function (data) {
-    L.geoJSON(data, {
-        pointToLayer: function (feature, latlng) {
-            return L.circleMarker(latlng, symbologyPoint);
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: 'var(--text-color)'
         }
-    }).addTo(jembatanPT);
-});
-jembatanPT.addTo(map);
-
-// Layer: Administrasi Kelurahan
-const adminKelurahanAR = new L.LayerGroup();
-$.getJSON("./asset/data-spasial/admin_kelurahan_ln.geojson", function (data) {
-    L.geoJSON(data, {
-        style: {
-            color: "black",
-            weight: 2,
-            opacity: 1,
-            dashArray: '3,3,20,3,20,3,20,3,20,3,20',
-            lineJoin: 'round'
+      },
+      y: {
+        ticks: {
+          color: 'var(--text-color)'
         }
-    }).addTo(adminKelurahanAR);
-});
-adminKelurahanAR.addTo(map);
-
-// Layer: Land Cover
-const landcover = new L.LayerGroup();
-$.getJSON("./asset/data-spasial/landcover_ar.geojson", function (data) {
-    L.geoJSON(data, {
-        style: function (feature) {
-            switch (feature.properties.REMARK) {
-                case 'Danau/Situ':
-                case 'Empang':
-                case 'Sungai':
-                    return { fillColor: "#97DBF2", fillOpacity: 0.8, weight: 0.5, color: "#4065EB" };
-                case 'Hutan Rimba':
-                    return { fillColor: "#38A800", fillOpacity: 0.8, color: "#38A800" };
-                case 'Perkebunan/Kebun':
-                    return { fillColor: "#E9FFBE", fillOpacity: 0.8, color: "#E9FFBE" };
-                case 'Permukiman dan Tempat Kegiatan':
-                    return { fillColor: "#FFBEBE", fillOpacity: 0.8, weight: 0.5, color: "#FB0101" };
-                case 'Sawah':
-                    return { fillColor: "#01FBBB", fillOpacity: 0.8, weight: 0.5, color: "#4065EB" };
-                case 'Semak Belukar':
-                    return { fillColor: "#FDFDFD", fillOpacity: 0.8, weight: 0.5, color: "#00A52F" };
-                case 'Tanah Kosong/Gundul':
-                    return { fillColor: "#FDFDFD", fillOpacity: 0.8, weight: 0.5, color: "#000000" };
-                case 'Tegalan/Ladang':
-                    return { fillColor: "#EDFF85", fillOpacity: 0.8, color: "#EDFF85" };
-                case 'Vegetasi Non Budidaya Lainnya':
-                    return { fillColor: "#000000", fillOpacity: 0.8, weight: 0.5, color: "#000000" };
-            }
-        },
-        onEachFeature: function (feature, layer) {
-            layer.bindPopup('<b>Tutupan Lahan:</b> ' + feature.properties.REMARK);
-        }
-    }).addTo(landcover);
+      }
+    }
+  }
 });
 
-// Basemaps and overlay layers
-const baseMaps = {
-    "OpenStreetMap": basemapOSM,
-    "OSM HOT": osmHOT,
-    "Google": baseMapGoogle
-};
+// Fungsi untuk memperbarui grafik
+function updateChart(city) {
+  // Simulasi data baru
+  const newData = Array.from({ length: 7 }, () => Math.floor(Math.random() * 100));
+  aqiChart.data.datasets[0].data = newData;
+  aqiChart.update();
+}
 
-const overlayMaps = {
-    "Jembatan": jembatanPT,
-    "Batas Administrasi": adminKelurahanAR,
-    "landcover_ar.geojson": landcover
-};
+// Fungsi prediksi AI sederhana
+function updatePrediction(currentAqi) {
+  let prediction = '';
+  if (currentAqi <= 50) {
+    prediction = 'Baik';
+  } else if (currentAqi <= 100) {
+    prediction = 'Sedang';
+  } else if (currentAqi <= 150) {
+    prediction = 'Tidak Sehat bagi Kelompok Sensitif';
+  } else if (currentAqi <= 200) {
+    prediction = 'Tidak Sehat';
+  } else if (currentAqi <= 300) {
+    prediction = 'Sangat Tidak Sehat';
+  } else {
+    prediction = 'Berbahaya';
+  }
+  document.getElementById('prediction-result').textContent = `Prediksi: ${prediction}`;
+}
 
-// Add layer control
-L.control.layers(baseMaps, overlayMaps).addTo(map);
-// Batas Administrasi
-adminKelurahanAR.addTo(map);
-
-// Jembatan
-jembatanPT.addTo(map);
-
-// Tutupan Lahan
-landcover.addTo(map);
-
+// Toggle dark/light mode
+const themeToggle = document.getElementById('theme-toggle');
+themeToggle.addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+});
